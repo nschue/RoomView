@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Start Menu
+  - Preset Room Menu
+  - Room Selection Menu
   layers:
   - Default
   - TransparentFX
