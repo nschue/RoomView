@@ -7,8 +7,7 @@ public class MenuButton : MonoBehaviour {
 
     public SteamVR_TrackedObject controller;
     
-    public LevelManager levelManager;
-    public string loadLevel;
+ 
 
 
     private SteamVR_TrackedController controllerInput;
@@ -58,8 +57,8 @@ public class MenuButton : MonoBehaviour {
         }
     }
 
-    void OnSelectButton(object sender, ClickedEventArgs e)
+    public virtual void OnSelectButton(object sender, ClickedEventArgs e)
     {
-        levelManager.LoadLevel(loadLevel);
+        Debug.LogError(this.name + ": No OnSelectButton method has been defined");
     }
 }
