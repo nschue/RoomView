@@ -1,19 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MenuButton : MonoBehaviour {
+public class Furniture : MonoBehaviour {
 
     public SteamVR_TrackedObject controller;
-    
+    public Material highlightMaterial;
+    public GameObject menu;
  
 
 
     private SteamVR_TrackedController controllerInput;
     private SteamVR_LaserPointer pointer;
-	// Use this for initialization
-	void Awake () {
+    private Material[] materialArray;
+    private Material[] newMaterialArray;
+    // Use this for initialization
+    void Awake () {
 	    if(controller !=null )
         {
             try
@@ -34,16 +38,22 @@ public class MenuButton : MonoBehaviour {
         pointer.PointerOut += OffHover;
     }
 
-    // Update is called once per frame
-    void Update () {
-		
-	}
+     void Start()
+    {
+        List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
+        List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
+        newMaterials.Add(highlightMaterial);
+        materialArray = materials.ToArray();
+        newMaterialArray = newMaterials.ToArray();
+    }
+
+
 
     void OnHover(object sender, PointerEventArgs e)
     {
         if(e.target == GetComponent<Collider>().transform)
         {
-            gameObject.GetComponent<Text>().color = Color.green;
+            gameObject.GetComponent<MeshRenderer>().materials = newMaterialArray;
             controllerInput.TriggerClicked += OnSelectButton;
         }
     }
@@ -52,13 +62,14 @@ public class MenuButton : MonoBehaviour {
     {
         if(e.target == GetComponent<Collider>().transform)
         {
-            gameObject.GetComponent<Text>().color = Color.black;
+            gameObject.GetComponent<MeshRenderer>().materials = materialArray;
             controllerInput.TriggerClicked -= OnSelectButton;
         }
     }
 
     public virtual void OnSelectButton(object sender, ClickedEventArgs e)
     {
-        Debug.LogError(this.name + ": No OnSelectButton method has been defined");
+        GameObject openMenu = Instantiate(menu,controller.transform.position, Quaternion.identity);
+        openMenu.transform.parent = controller.transform;
     }
 }

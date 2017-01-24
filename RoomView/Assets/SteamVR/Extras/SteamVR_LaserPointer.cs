@@ -8,6 +8,7 @@ public struct PointerEventArgs
     public uint flags;
     public float distance;
     public Transform target;
+    
 }
 
 public delegate void PointerEventHandler(object sender, PointerEventArgs e);
