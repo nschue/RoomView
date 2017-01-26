@@ -6,14 +6,13 @@ using UnityEngine.UI;
 public class MenuButton : MonoBehaviour {
 
     public SteamVR_TrackedObject controller;
-    
- 
 
-
-    private SteamVR_TrackedController controllerInput;
-    private SteamVR_LaserPointer pointer;
+    public SteamVR_TrackedController controllerInput;
+    public SteamVR_LaserPointer pointer;
 	// Use this for initialization
 	void Awake () {
+        GameObject controllerObject = GameObject.FindGameObjectWithTag("RightController") as GameObject;
+        controller = controllerObject.GetComponent<SteamVR_TrackedObject>();
 	    if(controller !=null )
         {
             try
@@ -34,12 +33,8 @@ public class MenuButton : MonoBehaviour {
         pointer.PointerOut += OffHover;
     }
 
-    // Update is called once per frame
-    void Update () {
-		
-	}
 
-    void OnHover(object sender, PointerEventArgs e)
+    public virtual void OnHover(object sender, PointerEventArgs e)
     {
         if(e.target == GetComponent<Collider>().transform)
         {
@@ -48,7 +43,7 @@ public class MenuButton : MonoBehaviour {
         }
     }
 
-    void OffHover(object sender, PointerEventArgs e)
+    public virtual void OffHover(object sender, PointerEventArgs e)
     {
         if(e.target == GetComponent<Collider>().transform)
         {

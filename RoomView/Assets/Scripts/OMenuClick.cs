@@ -7,14 +7,19 @@ public class OMenuClick : MonoBehaviour {
 
 	private bool isOn = false;	// button status
 
+    public SteamVR_TrackedObject controller;
 	public Sprite onSprite;		// holds the on sprite
 	public Sprite offSprite;	// holds the off sprite
+    private SteamVR_LaserPointer pointer;
 
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
 		activeImage = GetComponent<UnityEngine.UI.Image>(); // get the image component
-	}
+        pointer = controller.GetComponent<SteamVR_LaserPointer>();
+
+ 
+    }
 	
 	// Update is called once per frame
 	void Update () {
