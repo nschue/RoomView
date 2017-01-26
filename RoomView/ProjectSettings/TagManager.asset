@@ -8,6 +8,8 @@ TagManager:
   - Preset Room Menu
   - Room Selection Menu
   - New tag 5
+  - ContextMenu
+  - RightController
   layers:
   - Default
   - TransparentFX

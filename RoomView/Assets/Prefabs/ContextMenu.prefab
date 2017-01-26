@@ -235,6 +235,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4502036cd5c134c89218569b1190ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 0}
+  controllerInput: {fileID: 0}
+  pointer: {fileID: 0}
   onSprite: {fileID: 21300000, guid: a43b4ed2172117b41bed9ffac62f4628, type: 3}
   offSprite: {fileID: 21300000, guid: def0acf5e06f25e46b931418b132b980, type: 3}
   selectedAction: 2
@@ -249,6 +252,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4502036cd5c134c89218569b1190ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 0}
+  controllerInput: {fileID: 0}
+  pointer: {fileID: 0}
   onSprite: {fileID: 21300000, guid: 1c5abc6aca62a4a4bbc4fd59b9af04b3, type: 3}
   offSprite: {fileID: 21300000, guid: 582636c0399d3914db20aaacce13e3ec, type: 3}
   selectedAction: 0
@@ -263,6 +269,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4502036cd5c134c89218569b1190ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 0}
+  controllerInput: {fileID: 0}
+  pointer: {fileID: 0}
   onSprite: {fileID: 21300000, guid: ccecbd8a7de81294396e59329487ae39, type: 3}
   offSprite: {fileID: 21300000, guid: ac3c285c495a7664291ccb5b8c9baeb7, type: 3}
   selectedAction: 1
@@ -277,6 +286,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4502036cd5c134c89218569b1190ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 0}
+  controllerInput: {fileID: 0}
+  pointer: {fileID: 0}
   onSprite: {fileID: 21300000, guid: 956063279f128cd45aab1e2ae38c69d3, type: 3}
   offSprite: {fileID: 21300000, guid: 6d9e26abdc38db84185febb106353c84, type: 3}
   selectedAction: 3
@@ -454,7 +466,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1612241957131352}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 19.04815}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.0034, y: 0.0034, z: 1}
   m_Children:
   - {fileID: 224147474961113770}
@@ -466,7 +478,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -9.365263, y: 9.392107}
+  m_AnchoredPosition: {x: 0, y: -1000}
   m_SizeDelta: {x: 400, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224905920892837968
