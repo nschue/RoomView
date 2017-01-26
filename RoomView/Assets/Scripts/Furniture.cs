@@ -8,7 +8,7 @@ public class Furniture : MonoBehaviour {
 
     public SteamVR_TrackedObject controller;
     public Material highlightMaterial;
-    public GameObject menu;
+    public GameObject contextMenuPrefab;
  
 
 
@@ -45,6 +45,8 @@ public class Furniture : MonoBehaviour {
         newMaterials.Add(highlightMaterial);
         materialArray = materials.ToArray();
         newMaterialArray = newMaterials.ToArray();
+
+
     }
 
 
@@ -69,7 +71,8 @@ public class Furniture : MonoBehaviour {
 
     public virtual void OnSelectButton(object sender, ClickedEventArgs e)
     {
-        GameObject openMenu = Instantiate(menu,controller.transform.position, Quaternion.identity);
-        openMenu.transform.parent = controller.transform;
+        GameObject contextMenu = Instantiate(contextMenuPrefab)as GameObject;
+        contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
     }
 }
