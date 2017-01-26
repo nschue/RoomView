@@ -49,6 +49,12 @@ public class ContextMenuButton : MenuButton {
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {
         Debug.Log(selectedAction + "context menu button pressed");
+        switch (selectedAction)
+        {
+            case action.del:
+                Destroy(transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject);
+                break;
+        }
 
         Destroy(gameObject.transform.parent.gameObject);
 

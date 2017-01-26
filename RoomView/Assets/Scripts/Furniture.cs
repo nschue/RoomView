@@ -75,4 +75,11 @@ public class Furniture : MonoBehaviour {
         contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
     }
+
+    private void OnDestroy()
+    {
+        pointer.PointerIn -= OnHover;
+        pointer.PointerOut -= OffHover;
+        controllerInput.TriggerClicked -= OnSelectButton;
+    }
 }
