@@ -84,12 +84,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\ContextMenuController.cs" />
     <Compile Include="Assets\Scripts\ContextMenuButton.cs" />
+    <Compile Include="Assets\Scripts\ContextMenuController.cs" />
     <Compile Include="Assets\Scripts\Furniture.cs" />
     <Compile Include="Assets\Scripts\LevelManager.cs" />
     <Compile Include="Assets\Scripts\LoadSceneButton.cs" />
     <Compile Include="Assets\Scripts\LoadSubMenu.cs" />
+    <Compile Include="Assets\Scripts\MainMenu.cs" />
     <Compile Include="Assets\Scripts\MenuButton.cs" />
     <Compile Include="Assets\Scripts\OMenuClick.cs" />
     <Compile Include="Assets\Scripts\RoomSelectionMenu.cs" />

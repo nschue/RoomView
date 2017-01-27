@@ -9,10 +9,14 @@ public class MenuButton : MonoBehaviour {
 
     public SteamVR_TrackedController controllerInput;
     public SteamVR_LaserPointer pointer;
-	// Use this for initialization
-	void Awake () {
-        GameObject controllerObject = GameObject.FindGameObjectWithTag("RightController") as GameObject;
-        controller = controllerObject.GetComponent<SteamVR_TrackedObject>();
+    
+
+    void Awake () {
+        GameObject controllerObject = GameObject.FindGameObjectWithTag("Right Controller") as GameObject;
+        if (controllerObject != null & controller == null)
+            controller = controllerObject.GetComponent<SteamVR_TrackedObject>();
+        else
+            Debug.Log("controllerObject returned null");
 	    if(controller !=null )
         {
             try

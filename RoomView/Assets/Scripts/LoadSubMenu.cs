@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class LoadSubMenu : MenuButton {
 
-    public string[] hideMenus;
-    public string[] showMenus;
+    public string[] hideMenus;//Include a tag for each menu that should be hidden
+    public string[] showMenus;//Include a tag for each menu that should be shown
 
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {
@@ -19,7 +19,7 @@ public class LoadSubMenu : MenuButton {
 
         }
 
-
+       
         foreach(string showMenu in showMenus)
         {
             GameObject menu = GameObject.FindGameObjectWithTag(showMenu);

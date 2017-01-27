@@ -9,13 +9,15 @@ public class Furniture : MonoBehaviour {
     public SteamVR_TrackedObject controller;
     public Material highlightMaterial;
     public GameObject contextMenuPrefab;
- 
+    public bool isSelected = false;
 
 
     private SteamVR_TrackedController controllerInput;
     private SteamVR_LaserPointer pointer;
     private Material[] materialArray;
     private Material[] newMaterialArray;
+    private bool isHover = false;
+    
     // Use this for initialization
     void Awake () {
 	    if(controller !=null )
@@ -45,18 +47,23 @@ public class Furniture : MonoBehaviour {
         newMaterials.Add(highlightMaterial);
         materialArray = materials.ToArray();
         newMaterialArray = newMaterials.ToArray();
-
-
     }
 
+    private void Update()
+    {
+        if(isSelected || isHover)
+            gameObject.GetComponent<MeshRenderer>().materials = newMaterialArray;
+        else
+            gameObject.GetComponent<MeshRenderer>().materials = materialArray;
 
+    }
 
     void OnHover(object sender, PointerEventArgs e)
     {
         if(e.target == GetComponent<Collider>().transform)
         {
-            gameObject.GetComponent<MeshRenderer>().materials = newMaterialArray;
             controllerInput.TriggerClicked += OnSelectButton;
+            isHover = true;
         }
     }
 
@@ -64,7 +71,7 @@ public class Furniture : MonoBehaviour {
     {
         if(e.target == GetComponent<Collider>().transform)
         {
-            gameObject.GetComponent<MeshRenderer>().materials = materialArray;
+            isHover = false;
             controllerInput.TriggerClicked -= OnSelectButton;
         }
     }
@@ -74,6 +81,7 @@ public class Furniture : MonoBehaviour {
         GameObject contextMenu = Instantiate(contextMenuPrefab)as GameObject;
         contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
+        isSelected = true;
     }
 
     private void OnDestroy()

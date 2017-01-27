@@ -25,41 +25,6 @@ public class ContextMenuButton : MenuButton {
 
     }
 
-    public override void OnHover(object sender, PointerEventArgs e)
-    {
-        if (e.target == GetComponent<Collider>().transform)
-        {
-            isContextMenu = true;
-            controllerInput.TriggerClicked -= CloseContextMenu;
-            turnOn();
-            controllerInput.TriggerClicked += OnSelectButton;
-        }
-    }
-
-    public override void OffHover(object sender, PointerEventArgs e)
-    {
-        if(e.target == GetComponent<Collider>().transform)
-        {
-            isContextMenu = false;
-            turnOff();
-            controllerInput.TriggerClicked -= OnSelectButton;
-            controllerInput.TriggerClicked += CloseContextMenu;
-        }
-    }
-    public override void OnSelectButton(object sender, ClickedEventArgs e)
-    {
-        Debug.Log(selectedAction + "context menu button pressed");
-        switch (selectedAction)
-        {
-            case action.del:
-                Destroy(transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject);
-                break;
-        }
-
-        Destroy(gameObject.transform.parent.gameObject);
-
-    }
-
     // sets the off sprite and flag
     public void turnOff()
     {
@@ -84,17 +49,111 @@ public class ContextMenuButton : MenuButton {
     {
         if (!isContextMenu)
         {
+            DeselectFurniture();
             Destroy(gameObject.transform.parent.gameObject);
         }
     }
 
+    private void DeselectFurniture()
+    {
+        gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isSelected = false;
+    }
+
+    private void RotateFurniture()
+    {
+        //Hides the context menu button
+        foreach(Transform child in transform.parent)
+        {
+            child.gameObject.SetActive(false);
+        }
+        controllerInput.PadClicked += PadClicked;
+    }
+
+    public override void OnHover(object sender, PointerEventArgs e)
+    {
+        if (e.target == GetComponent<Collider>().transform)
+        {
+            isContextMenu = true;
+            controllerInput.TriggerClicked -= CloseContextMenu;
+            turnOn();
+            controllerInput.TriggerClicked += OnSelectButton;
+        }
+    }
+
+    public override void OffHover(object sender, PointerEventArgs e)
+    {
+        if (e.target == GetComponent<Collider>().transform)
+        {
+            isContextMenu = false;
+            turnOff();
+            controllerInput.TriggerClicked -= OnSelectButton;
+            controllerInput.TriggerClicked += CloseContextMenu;
+        }
+    }
+    public override void OnSelectButton(object sender, ClickedEventArgs e)
+    {
+        Debug.Log(selectedAction + "context menu button pressed");
+        switch (selectedAction)
+        {
+            case action.move:
+                //TODO move furniture code
+                DeselectFurniture();
+                Destroy(gameObject.transform.parent.gameObject);
+                break;
+
+            case action.rotate:
+                //TODO rotate furniture code
+                RotateFurniture();
+                
+                break;
+
+            case action.clone:
+                //TODO clone furniture code
+                DeselectFurniture();
+                Destroy(gameObject.transform.parent.gameObject);
+                break;
+
+            case action.del:
+                DeselectFurniture();
+                Destroy(transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject);
+                Destroy(gameObject.transform.parent.gameObject);
+                break;
+        }
+
+        
+
+    }
+
+    private void PadClicked(object sender, ClickedEventArgs e)
+    {
+        Debug.Log(e.padX);
+        //Check x position of touch and then rotate
+        if (e.padX>0)
+        {
+            float rotationAngle = 15f;
+            Transform furnitureTransform = gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform;
+            Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * furnitureTransform.rotation;
+            furnitureTransform.rotation = targetQuat;
+            Debug.Log("Rotate item right");
+        }
+        else
+        {
+            float rotationAngle = -15f;
+            Transform furnitureTransform = gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform;
+            Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * furnitureTransform.rotation;
+            furnitureTransform.rotation = targetQuat;
+            Debug.Log("Rotate item left");
+        }
+    }
 
     private void OnDestroy()
     {
-        Debug.Log("Running OnDestroy");
+        Debug.Log("Running OnDestroy for Context Menu Button" + selectedAction);
         pointer.PointerIn -= OnHover;
         pointer.PointerOut -= OffHover;
         controllerInput.TriggerClicked -= CloseContextMenu;
         controllerInput.TriggerClicked -= OnSelectButton;
+        controllerInput.PadClicked -= PadClicked;
     }
+
 }
