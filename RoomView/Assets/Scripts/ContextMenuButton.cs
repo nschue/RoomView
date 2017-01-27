@@ -14,6 +14,7 @@ public class ContextMenuButton : MenuButton {
     public Sprite offSprite;    // holds the off sprite
     public action selectedAction;
 
+    private bool isRotate = false;
     private static bool isContextMenu; 
     private bool isOn = false;	// button status
     private UnityEngine.UI.Image buttonImage;
@@ -25,6 +26,12 @@ public class ContextMenuButton : MenuButton {
 
     }
 
+    private void Update()
+    {
+        if (isRotate)
+            transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform.rotation =
+                controller.transform.rotation;
+    }
     // sets the off sprite and flag
     public void turnOff()
     {
@@ -128,22 +135,24 @@ public class ContextMenuButton : MenuButton {
     {
         Debug.Log(e.padX);
         //Check x position of touch and then rotate
-        if (e.padX>0)
-        {
-            float rotationAngle = 15f;
-            Transform furnitureTransform = gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform;
-            Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * furnitureTransform.rotation;
-            furnitureTransform.rotation = targetQuat;
-            Debug.Log("Rotate item right");
-        }
-        else
-        {
-            float rotationAngle = -15f;
-            Transform furnitureTransform = gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform;
-            Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * furnitureTransform.rotation;
-            furnitureTransform.rotation = targetQuat;
-            Debug.Log("Rotate item left");
-        }
+        transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isRotate = !transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isRotate;
+        Debug.Log("isRotate set to: " + transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isRotate);
+        //if (e.padX>0)
+        //{
+        //    float rotationAngle = 15f;
+        //    Transform furnitureTransform = gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform;
+        //    Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * furnitureTransform.rotation;
+        //    furnitureTransform.rotation = targetQuat;
+        //    Debug.Log("Rotate item right");
+        //}
+        //else
+        //{
+        //    float rotationAngle = -15f;
+        //    Transform furnitureTransform = gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform;
+        //    Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * furnitureTransform.rotation;
+        //    furnitureTransform.rotation = targetQuat;
+        //    Debug.Log("Rotate item left");
+        //}
     }
 
     private void OnDestroy()

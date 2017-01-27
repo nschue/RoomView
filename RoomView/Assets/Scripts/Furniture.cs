@@ -10,6 +10,7 @@ public class Furniture : MonoBehaviour {
     public Material highlightMaterial;
     public GameObject contextMenuPrefab;
     public bool isSelected = false;
+    public bool isRotate = false; 
 
 
     private SteamVR_TrackedController controllerInput;
@@ -17,7 +18,9 @@ public class Furniture : MonoBehaviour {
     private Material[] materialArray;
     private Material[] newMaterialArray;
     private bool isHover = false;
-    
+    private Quaternion targetRotation = Quaternion.identity;
+    private Vector3 rotationDifference;
+
     // Use this for initialization
     void Awake () {
 	    if(controller !=null )
@@ -38,6 +41,7 @@ public class Furniture : MonoBehaviour {
     {
         pointer.PointerIn += OnHover;
         pointer.PointerOut += OffHover;
+        controllerInput.PadClicked += OnPadClicked;
     }
 
      void Start()
@@ -51,7 +55,15 @@ public class Furniture : MonoBehaviour {
 
     private void Update()
     {
-        if(isSelected || isHover)
+
+        if (isRotate)
+        {
+            targetRotation = controller.transform.rotation; 
+            targetRotation.eulerAngles = new Vector3(transform.eulerAngles.x, targetRotation.eulerAngles.y + rotationDifference.y, transform.eulerAngles.z);
+            transform.rotation = targetRotation;
+        }
+
+        if (isSelected || isHover)
             gameObject.GetComponent<MeshRenderer>().materials = newMaterialArray;
         else
             gameObject.GetComponent<MeshRenderer>().materials = materialArray;
@@ -82,6 +94,12 @@ public class Furniture : MonoBehaviour {
         contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
         isSelected = true;
+    }
+
+    private void OnPadClicked(object sender, ClickedEventArgs e)
+    {
+        targetRotation = controller.transform.rotation;
+        rotationDifference = transform.rotation.eulerAngles - targetRotation.eulerAngles;
     }
 
     private void OnDestroy()
