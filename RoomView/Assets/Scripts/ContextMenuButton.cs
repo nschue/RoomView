@@ -14,7 +14,6 @@ public class ContextMenuButton : MenuButton {
     public Sprite offSprite;    // holds the off sprite
     public action selectedAction;
 
-    private bool isRotate = false;
     private static bool isContextMenu; 
     private bool isOn = false;	// button status
     private UnityEngine.UI.Image buttonImage;
@@ -26,12 +25,6 @@ public class ContextMenuButton : MenuButton {
 
     }
 
-    private void Update()
-    {
-        if (isRotate)
-            transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.transform.rotation =
-                controller.transform.rotation;
-    }
     // sets the off sprite and flag
     public void turnOff()
     {
@@ -66,14 +59,25 @@ public class ContextMenuButton : MenuButton {
         gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isSelected = false;
     }
 
+    private void MoveFurniture()
+    {
+        foreach (Transform child in transform.parent)
+        {
+            child.gameObject.SetActive(false);
+        }
+        transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isMove = true;
+
+    }
+
     private void RotateFurniture()
     {
-        //Hides the context menu button
+        //Hides the context menu button while keeping it in the scene
+        //This prevents event listener from being lost before the user is done rotating the object. 
         foreach(Transform child in transform.parent)
         {
             child.gameObject.SetActive(false);
         }
-        controllerInput.PadClicked += PadClicked;
+        controllerInput.PadClicked += OnPadClicked;
     }
 
     public override void OnHover(object sender, PointerEventArgs e)
@@ -104,12 +108,10 @@ public class ContextMenuButton : MenuButton {
         {
             case action.move:
                 //TODO move furniture code
-                DeselectFurniture();
-                Destroy(gameObject.transform.parent.gameObject);
+                MoveFurniture();
                 break;
 
             case action.rotate:
-                //TODO rotate furniture code
                 RotateFurniture();
                 
                 break;
@@ -131,7 +133,7 @@ public class ContextMenuButton : MenuButton {
 
     }
 
-    private void PadClicked(object sender, ClickedEventArgs e)
+    private void OnPadClicked(object sender, ClickedEventArgs e)
     {
         Debug.Log(e.padX);
         //Check x position of touch and then rotate
@@ -162,7 +164,7 @@ public class ContextMenuButton : MenuButton {
         pointer.PointerOut -= OffHover;
         controllerInput.TriggerClicked -= CloseContextMenu;
         controllerInput.TriggerClicked -= OnSelectButton;
-        controllerInput.PadClicked -= PadClicked;
+        controllerInput.PadClicked -= OnPadClicked;
     }
 
 }

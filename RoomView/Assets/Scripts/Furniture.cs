@@ -10,7 +10,8 @@ public class Furniture : MonoBehaviour {
     public Material highlightMaterial;
     public GameObject contextMenuPrefab;
     public bool isSelected = false;
-    public bool isRotate = false; 
+    public bool isRotate = false;
+    public bool isMove = false;
 
 
     private SteamVR_TrackedController controllerInput;
@@ -22,8 +23,8 @@ public class Furniture : MonoBehaviour {
     private Vector3 rotationDifference;
 
     // Use this for initialization
-    void Awake () {
-	    if(controller !=null )
+    void Awake() {
+        if (controller != null)
         {
             try
             {
@@ -32,10 +33,10 @@ public class Furniture : MonoBehaviour {
             }
             catch
             {
-                Debug.LogError(this.name +": Could not find LaserPointer");
+                Debug.LogError(this.name + ": Could not find LaserPointer");
             }
         }
-	}
+    }
 
     private void OnEnable()
     {
@@ -44,7 +45,7 @@ public class Furniture : MonoBehaviour {
         controllerInput.PadClicked += OnPadClicked;
     }
 
-     void Start()
+    void Start()
     {
         List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
         List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
@@ -58,9 +59,21 @@ public class Furniture : MonoBehaviour {
 
         if (isRotate)
         {
-            targetRotation = controller.transform.rotation; 
+            targetRotation = controller.transform.rotation;
             targetRotation.eulerAngles = new Vector3(transform.eulerAngles.x, targetRotation.eulerAngles.y + rotationDifference.y, transform.eulerAngles.z);
             transform.rotation = targetRotation;
+        }
+        
+                
+        
+        else if (isMove)
+        {
+            Ray raycast = new Ray(controller.transform.position, controller.transform.forward);
+            RaycastHit hit;
+            bool bHit = Physics.Raycast(raycast, out hit);
+            transform.position = hit.point;
+            controllerInput.TriggerClicked -= OnSelectButton; 
+            controllerInput.TriggerClicked += DeselectFurniture;
         }
 
         if (isSelected || isHover)
@@ -68,6 +81,13 @@ public class Furniture : MonoBehaviour {
         else
             gameObject.GetComponent<MeshRenderer>().materials = materialArray;
 
+    }
+
+    void DeselectFurniture (object sender, ClickedEventArgs e)
+    {
+        isSelected = false;
+        controllerInput.TriggerClicked += OnSelectButton;
+        controllerInput.TriggerClicked -= DeselectFurniture;
     }
 
     void OnHover(object sender, PointerEventArgs e)
