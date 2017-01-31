@@ -12,6 +12,8 @@ public class Furniture : MonoBehaviour {
     public bool isSelected = false;
     public bool isRotate = false;
     public bool isMove = false;
+    public static bool furnitureSelected = false;
+
 
 
     private SteamVR_TrackedController controllerInput;
@@ -21,7 +23,7 @@ public class Furniture : MonoBehaviour {
     private bool isHover = false;
     private Quaternion targetRotation = Quaternion.identity;
     private Vector3 rotationDifference;
-
+    private bool isMoving = false;
     // Use this for initialization
     void Awake() {
         if (controller != null)
@@ -64,35 +66,44 @@ public class Furniture : MonoBehaviour {
             transform.rotation = targetRotation;
         }
         
-                
-        
-        else if (isMove)
+        if(isMove & !isMoving)
         {
-            Ray raycast = new Ray(controller.transform.position, controller.transform.forward);
+            isMoving = true;
+            controllerInput.TriggerClicked -= OnSelectButton;
+            controllerInput.TriggerClicked += CompleteMove;
+        }        
+        
+        else if (isMove)//Conext menu button sets isMove
+        {
+            Ray raycast = new Ray(controller.transform.position, controller.transform.forward); //
             RaycastHit hit;
             bool bHit = Physics.Raycast(raycast, out hit);
             transform.position = hit.point;
-            controllerInput.TriggerClicked -= OnSelectButton; 
-            controllerInput.TriggerClicked += DeselectFurniture;
+
         }
 
-        if (isSelected || isHover)
+        if (isSelected || isHover)//If hover or selected highlight
             gameObject.GetComponent<MeshRenderer>().materials = newMaterialArray;
         else
             gameObject.GetComponent<MeshRenderer>().materials = materialArray;
 
     }
 
-    void DeselectFurniture (object sender, ClickedEventArgs e)
+    void CompleteMove(object sender, ClickedEventArgs e)
     {
+        Debug.Log("Furniture.CompleteMove: BEGIN");
         isSelected = false;
-        controllerInput.TriggerClicked += OnSelectButton;
-        controllerInput.TriggerClicked -= DeselectFurniture;
+        furnitureSelected = false;
+        isMove = false;
+        gameObject.layer = 0;
+        controllerInput.TriggerClicked -= CompleteMove;
+        isMoving = false;
+        Debug.Log("Furniture.CompleteMove END");
     }
 
     void OnHover(object sender, PointerEventArgs e)
     {
-        if(e.target == GetComponent<Collider>().transform)
+        if((e.target == GetComponent<Collider>().transform) && !isSelected && !furnitureSelected)
         {
             controllerInput.TriggerClicked += OnSelectButton;
             isHover = true;
@@ -114,6 +125,8 @@ public class Furniture : MonoBehaviour {
         contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
         isSelected = true;
+        furnitureSelected = true;
+        
     }
 
     private void OnPadClicked(object sender, ClickedEventArgs e)

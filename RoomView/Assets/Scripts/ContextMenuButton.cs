@@ -57,16 +57,13 @@ public class ContextMenuButton : MenuButton {
     private void DeselectFurniture()
     {
         gameObject.transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isSelected = false;
+        Furniture.furnitureSelected = false;
     }
 
     private void MoveFurniture()
     {
-        foreach (Transform child in transform.parent)
-        {
-            child.gameObject.SetActive(false);
-        }
+        transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.layer = 2;
         transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject.GetComponent<Furniture>().isMove = true;
-
     }
 
     private void RotateFurniture()
@@ -109,6 +106,7 @@ public class ContextMenuButton : MenuButton {
             case action.move:
                 //TODO move furniture code
                 MoveFurniture();
+                Destroy(gameObject.transform.parent.gameObject);
                 break;
 
             case action.rotate:
