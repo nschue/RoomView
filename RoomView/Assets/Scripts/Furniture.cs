@@ -9,23 +9,35 @@ public class Furniture : MonoBehaviour {
     public SteamVR_TrackedObject controller;
     public Material highlightMaterial;
     public GameObject contextMenuPrefab;
+    public static bool isFurnitureSelected = false;
     public bool isSelected = false;
     public bool isRotate = false;
     public bool isMove = false;
-    public static bool furnitureSelected = false;
-
+    public bool isClone = false;
+    public Material[] materialArray;
+    public Material[] materialArrayWithHighlight;
+    
 
 
     private SteamVR_TrackedController controllerInput;
     private SteamVR_LaserPointer pointer;
-    private Material[] materialArray;
-    private Material[] newMaterialArray;
     private bool isHover = false;
+    private bool isMoving = false;
     private Quaternion targetRotation = Quaternion.identity;
     private Vector3 rotationDifference;
-    private bool isMoving = false;
+    private float padX;
+
+
     // Use this for initialization
     void Awake() {
+        
+        //Can't be completed on furniture in the room at start
+
+        //controller is empty do this
+        /*GameObject controllerObject = GameObject.FindGameObjectWithTag("Right Controller") as GameObject;
+        //controller = controllerObject.GetComponent<SteamVR_TrackedObject>();*/
+        
+
         if (controller != null)
         {
             try
@@ -49,11 +61,15 @@ public class Furniture : MonoBehaviour {
 
     void Start()
     {
-        List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
-        List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
-        newMaterials.Add(highlightMaterial);
-        materialArray = materials.ToArray();
-        newMaterialArray = newMaterials.ToArray();
+        if (!isClone) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
+        {
+            List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
+            List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
+            newMaterials.Add(highlightMaterial);
+            materialArray = materials.ToArray();
+            materialArrayWithHighlight = newMaterials.ToArray();
+        }
+
     }
 
     private void Update()
@@ -61,12 +77,25 @@ public class Furniture : MonoBehaviour {
 
         if (isRotate)
         {
-            targetRotation = controller.transform.rotation;
-            targetRotation.eulerAngles = new Vector3(transform.eulerAngles.x, targetRotation.eulerAngles.y + rotationDifference.y, transform.eulerAngles.z);
-            transform.rotation = targetRotation;
+            //targetRotation = controller.transform.rotation;
+            //targetRotation.eulerAngles = new Vector3(transform.eulerAngles.x, targetRotation.eulerAngles.y + rotationDifference.y, transform.eulerAngles.z);
+            //transform.rotation = targetRotation;
+            float rotationAngle = 60f * Time.deltaTime;
+            if (padX>0)
+            {
+                Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * transform.rotation;
+                transform.rotation = targetQuat;
+                //Debug.Log("Rotate item right");
+            }
+            else
+            {
+                Quaternion targetQuat = Quaternion.AngleAxis(-rotationAngle, Vector3.up) * transform.rotation;
+                transform.rotation = targetQuat;
+                //Debug.Log("Rotate item left");
+            }
         }
-        
-        if(isMove & !isMoving)
+
+        if (isMove & !isMoving)
         {
             isMoving = true;
             controllerInput.TriggerClicked -= OnSelectButton;
@@ -82,8 +111,9 @@ public class Furniture : MonoBehaviour {
 
         }
 
+
         if (isSelected || isHover)//If hover or selected highlight
-            gameObject.GetComponent<MeshRenderer>().materials = newMaterialArray;
+            gameObject.GetComponent<MeshRenderer>().materials = materialArrayWithHighlight;
         else
             gameObject.GetComponent<MeshRenderer>().materials = materialArray;
 
@@ -93,17 +123,18 @@ public class Furniture : MonoBehaviour {
     {
         Debug.Log("Furniture.CompleteMove: BEGIN");
         isSelected = false;
-        furnitureSelected = false;
+        isHover = false;
+        isFurnitureSelected = false;
         isMove = false;
         gameObject.layer = 0;
         controllerInput.TriggerClicked -= CompleteMove;
         isMoving = false;
-        Debug.Log("Furniture.CompleteMove END");
+        Debug.Log("Furniture.CompleteMove: END");
     }
 
     void OnHover(object sender, PointerEventArgs e)
     {
-        if((e.target == GetComponent<Collider>().transform) && !isSelected && !furnitureSelected)
+        if((e.target == GetComponent<Collider>().transform) && !isSelected && !isFurnitureSelected)
         {
             controllerInput.TriggerClicked += OnSelectButton;
             isHover = true;
@@ -125,14 +156,13 @@ public class Furniture : MonoBehaviour {
         contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
         isSelected = true;
-        furnitureSelected = true;
+        isFurnitureSelected = true;
         
     }
 
     private void OnPadClicked(object sender, ClickedEventArgs e)
     {
-        targetRotation = controller.transform.rotation;
-        rotationDifference = transform.rotation.eulerAngles - targetRotation.eulerAngles;
+        padX = e.padX;
     }
 
     private void OnDestroy()
@@ -140,5 +170,6 @@ public class Furniture : MonoBehaviour {
         pointer.PointerIn -= OnHover;
         pointer.PointerOut -= OffHover;
         controllerInput.TriggerClicked -= OnSelectButton;
+        controllerInput.PadClicked -= OnPadClicked;
     }
 }
