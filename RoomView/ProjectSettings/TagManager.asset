@@ -11,6 +11,7 @@ TagManager:
   - ContextMenu
   - RightController
   - Right Controller
+  - LeftController
   layers:
   - Default
   - TransparentFX

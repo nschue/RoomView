@@ -16,7 +16,11 @@ public class Furniture : MonoBehaviour {
     public bool isClone = false;
     public Material[] materialArray;
     public Material[] materialArrayWithHighlight;
-    
+
+    public bool fromCatalog = false;
+    public bool needsPlacement = false;
+    public bool placing = false;
+
 
 
     private SteamVR_TrackedController controllerInput;
@@ -54,14 +58,30 @@ public class Furniture : MonoBehaviour {
 
     private void OnEnable()
     {
-        pointer.PointerIn += OnHover;
-        pointer.PointerOut += OffHover;
-        controllerInput.PadClicked += OnPadClicked;
+        if (fromCatalog)
+        {
+            isMove = false;
+            needsPlacement = true;
+            gameObject.layer = 2;
+            pointer = GameObject.Find("Controller (right)").GetComponent<SteamVR_LaserPointer>();
+            controllerInput = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedController>();
+
+        }
+        else
+        {
+            pointer.PointerIn += OnHover;
+            pointer.PointerOut += OffHover;
+            controllerInput.PadClicked += OnPadClicked;
+        }
+        
+
+
+
     }
 
     void Start()
     {
-        if (!isClone) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
+        if (!isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
         {
             List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
             List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
@@ -69,6 +89,15 @@ public class Furniture : MonoBehaviour {
             materialArray = materials.ToArray();
             materialArrayWithHighlight = newMaterials.ToArray();
         }
+
+        if(controller == null)
+            controller = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedObject>();
+
+        if(controllerInput == null)
+            controllerInput = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedController>();
+
+        if(pointer == null)
+            pointer = GameObject.Find("Controller (right)").GetComponent<SteamVR_LaserPointer>();
 
     }
 
@@ -95,7 +124,7 @@ public class Furniture : MonoBehaviour {
             }
         }
 
-        if (isMove & !isMoving)
+        if (isMove & !isMoving & !fromCatalog)
         {
             isMoving = true;
             controllerInput.TriggerClicked -= OnSelectButton;
@@ -109,6 +138,18 @@ public class Furniture : MonoBehaviour {
             bool bHit = Physics.Raycast(raycast, out hit);
             transform.position = hit.point;
 
+        }
+
+        if(needsPlacement && !placing){
+            placing = true;
+            controllerInput.TriggerClicked += CompleteMove;
+        }
+        else if (needsPlacement)
+        {
+            Ray raycast = new Ray(controller.transform.position, controller.transform.forward); //
+            RaycastHit hit;
+            bool bHit = Physics.Raycast(raycast, out hit);
+            transform.position = hit.point;
         }
 
 
@@ -130,6 +171,15 @@ public class Furniture : MonoBehaviour {
         controllerInput.TriggerClicked -= CompleteMove;
         isMoving = false;
         Debug.Log("Furniture.CompleteMove: END");
+
+        if (needsPlacement == true)
+        {
+            needsPlacement = false;
+            pointer.PointerIn += OnHover;
+            pointer.PointerOut += OffHover;
+            controllerInput.PadClicked += OnPadClicked;
+            fromCatalog = false;
+        }
     }
 
     void OnHover(object sender, PointerEventArgs e)

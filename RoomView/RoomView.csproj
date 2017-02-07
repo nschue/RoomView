@@ -84,6 +84,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\CatButtonController.cs" />
+    <Compile Include="Assets\Scripts\CatalogCanvasFollower.cs" />
+    <Compile Include="Assets\Scripts\CatalogManager.cs" />
     <Compile Include="Assets\Scripts\ContextMenuButton.cs" />
     <Compile Include="Assets\Scripts\ContextMenuController.cs" />
     <Compile Include="Assets\Scripts\Furniture.cs" />
@@ -93,6 +96,8 @@
     <Compile Include="Assets\Scripts\MainMenu.cs" />
     <Compile Include="Assets\Scripts\MenuButton.cs" />
     <Compile Include="Assets\Scripts\OMenuClick.cs" />
+    <Compile Include="Assets\Scripts\ObjectCategory.cs" />
+    <Compile Include="Assets\Scripts\RoomOptions.cs" />
     <Compile Include="Assets\Scripts\RoomSelectionMenu.cs" />
     <Compile Include="Assets\Scripts\TeleportController.cs" />
     <Compile Include="Assets\Scripts\UI_Follower.cs" />

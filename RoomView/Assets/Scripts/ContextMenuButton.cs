@@ -77,6 +77,7 @@ public class ContextMenuButton : MenuButton {
         GameObject cloneObject = Instantiate(snappedObject);
         cloneObject.GetComponent<Furniture>().isClone = true;
         cloneObject.GetComponent<Furniture>().isSelected = true;
+        cloneObject.GetComponent<Furniture>().fromCatalog = false;
         cloneObject.layer = 2;
         cloneObject.GetComponent<Furniture>().isMove = true;
         cloneObject.GetComponent<Furniture>().materialArray = snappedObject.GetComponent<Furniture>().materialArray;
