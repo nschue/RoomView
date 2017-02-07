@@ -22,7 +22,7 @@ public class Furniture : MonoBehaviour {
     public bool placing = false;
 
 
-
+    private Vector3 offset;
     private SteamVR_TrackedController controllerInput;
     private SteamVR_LaserPointer pointer;
     private bool isHover = false;
@@ -30,6 +30,7 @@ public class Furniture : MonoBehaviour {
     private Quaternion targetRotation = Quaternion.identity;
     private Vector3 rotationDifference;
     private float padX;
+    private int id;
 
 
     // Use this for initialization
@@ -73,14 +74,13 @@ public class Furniture : MonoBehaviour {
             pointer.PointerOut += OffHover;
             controllerInput.PadClicked += OnPadClicked;
         }
-        
-
-
 
     }
 
     void Start()
     {
+        id = GetComponent<ObjectCategory>().objectID;
+        
         if (!isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
         {
             List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
@@ -129,6 +129,7 @@ public class Furniture : MonoBehaviour {
             isMoving = true;
             controllerInput.TriggerClicked -= OnSelectButton;
             controllerInput.TriggerClicked += CompleteMove;
+            offset = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
         }        
         
         else if (isMove)//Conext menu button sets isMove
@@ -136,20 +137,20 @@ public class Furniture : MonoBehaviour {
             Ray raycast = new Ray(controller.transform.position, controller.transform.forward); //
             RaycastHit hit;
             bool bHit = Physics.Raycast(raycast, out hit);
-            transform.position = hit.point;
-
+            transform.position = hit.point + offset;
         }
 
         if(needsPlacement && !placing){
             placing = true;
             controllerInput.TriggerClicked += CompleteMove;
+            offset = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
         }
         else if (needsPlacement)
         {
             Ray raycast = new Ray(controller.transform.position, controller.transform.forward); //
             RaycastHit hit;
             bool bHit = Physics.Raycast(raycast, out hit);
-            transform.position = hit.point;
+            transform.position = hit.point + offset;
         }
 
 

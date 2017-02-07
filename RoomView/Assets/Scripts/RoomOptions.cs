@@ -41,8 +41,8 @@ public class RoomOptions : MonoBehaviour {
         {
             GameObject contextMenu = Instantiate(gameOptionsPrefab, new Vector3(5, 5, 5),
             Quaternion.identity) as GameObject;
-            //contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-           // contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
+            contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+           contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
         }
     
     }

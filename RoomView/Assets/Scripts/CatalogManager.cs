@@ -331,7 +331,21 @@ public class CatalogManager : MonoBehaviour {
 		Debug.LogWarning("Object ID not found");
 	}
 
-	public void spawnByCatalogButton(int buttonID, Vector3 location) {
+    public GameObject getObjectByID(int objectID)
+    {
+        for (int i = 0; i < catalogSize; i++)
+        {
+            if (catalog[i].GetComponent<ObjectCategory>().objectID == objectID)
+            {
+                return catalog[i];
+            }
+        }
+        
+        Debug.LogWarning("Object ID not found");
+        return null;
+    }
+
+    public void spawnByCatalogButton(int buttonID, Vector3 location) {
 		if (buttonID < 1 || buttonID > 6) {
 			Debug.LogWarning("Button index out of range");
 			return;
