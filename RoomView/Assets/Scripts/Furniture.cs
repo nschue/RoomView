@@ -129,7 +129,7 @@ public class Furniture : MonoBehaviour {
             isMoving = true;
             controllerInput.TriggerClicked -= OnSelectButton;
             controllerInput.TriggerClicked += CompleteMove;
-            offset = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
+            offset = GameObject.Find("CatalogManager").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
         }        
         
         else if (isMove)//Conext menu button sets isMove
@@ -143,7 +143,7 @@ public class Furniture : MonoBehaviour {
         if(needsPlacement && !placing){
             placing = true;
             controllerInput.TriggerClicked += CompleteMove;
-            offset = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
+            offset = GameObject.Find("CatalogManager").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
         }
         else if (needsPlacement)
         {

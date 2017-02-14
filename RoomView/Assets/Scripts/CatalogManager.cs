@@ -48,8 +48,6 @@ public class CatalogManager : MonoBehaviour {
 		ShowObjectPreviews();
 		catalogCanvas.gameObject.SetActive(false);
 
-
-        // experimental
         controllerInput.MenuButtonClicked += displayCatalog;
     }
 

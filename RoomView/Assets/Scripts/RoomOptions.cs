@@ -4,48 +4,64 @@ using UnityEngine;
 
 public class RoomOptions : MonoBehaviour {
 
-    public SteamVR_TrackedObject controller;
-    public SteamVR_TrackedController controllerInput;
-    public SteamVR_LaserPointer pointer;
-    public GameObject gameOptionsPrefab;
-    private bool optionsDisplaying = false;
 
+    
+    public SteamVR_TrackedController controllerInput;
+    private SteamVR_LaserPointer pointer;
+   
+    private bool optionsDisplaying = false;
+    private bool isSelected = false;
+    private bool buttonSelected = false;
 
     void Awake()
     {
-       controller = GetComponent<SteamVR_TrackedObject>(); 
-        if (controller != null)
-        {
-            try
-            {
-                pointer = controller.GetComponent<SteamVR_LaserPointer>();
-                controllerInput = controller.GetComponent<SteamVR_TrackedController>();
-            }
-            catch
-            {
-                Debug.LogError(this.name + ": Could not find LaserPointer");
-            }
-        }
+   
+        controllerInput.MenuButtonClicked += displayInRoomMenu;
+        gameObject.SetActive(false);
     }
-    private void OnEnable()
-    {
-         controllerInput.MenuButtonClicked += displayInRoomMenu;
 
-    }
-    
- 
+   
+  
     public virtual void displayInRoomMenu(object sender, ClickedEventArgs e)
     {
         
-        if (!optionsDisplaying)
+        if (optionsDisplaying)
         {
-            GameObject contextMenu = Instantiate(gameOptionsPrefab, new Vector3(5, 5, 5),
-            Quaternion.identity) as GameObject;
-            contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-           contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
+            optionsOff();
         }
-    
+        else
+        {
+            optionsOn();
+        }
     }
-    
+    public void Update()
+    {
+        transform.LookAt(2 * transform.position - Camera.main.transform.position);
+    }
+
+    public virtual void onSelectClick(object sender, ClickedEventArgs e)
+    {
+
+    }
+    public virtual void offSelectClick(object sender, ClickedEventArgs e)
+    {
+
+
+    }
+    public void optionsOn()
+    {
+       gameObject.SetActive(true);
+       transform.position = Camera.main.transform.position + Camera.main.transform.forward * 3.0f;
+      
+        optionsDisplaying = true;
+    }
+    public void optionsOff()
+    {
+        transform.position = new Vector3(0.0f, -100.0f, 0.0f);
+       gameObject.SetActive(false);
+        optionsDisplaying = false;
+
+    }
+
 
 }
