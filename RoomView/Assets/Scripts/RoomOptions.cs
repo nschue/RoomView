@@ -58,7 +58,7 @@ public class RoomOptions : MonoBehaviour {
     public void optionsOff()
     {
         transform.position = new Vector3(0.0f, -100.0f, 0.0f);
-       gameObject.SetActive(false);
+        gameObject.SetActive(false);
         optionsDisplaying = false;
 
     }
