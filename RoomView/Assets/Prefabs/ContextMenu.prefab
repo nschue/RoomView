@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 114984740668583352}
   - component: {fileID: 114633104410126342}
   - component: {fileID: 65929401385010584}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Del_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 114209608377910332}
   - component: {fileID: 114271786206000768}
   - component: {fileID: 65230674709505410}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Move_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61,7 +61,7 @@ GameObject:
   - component: {fileID: 114669097275622304}
   - component: {fileID: 114283979732422102}
   - component: {fileID: 65683492502641680}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Rot_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80,7 +80,7 @@ GameObject:
   - component: {fileID: 114699129647933646}
   - component: {fileID: 114238115850660958}
   - component: {fileID: 114923036201967702}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: ContextMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 114015649435465750}
   - component: {fileID: 114248581106712116}
   - component: {fileID: 65885426297716410}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Clone_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}

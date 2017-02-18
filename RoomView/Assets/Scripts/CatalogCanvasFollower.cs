@@ -8,5 +8,6 @@ public class CatalogCanvasFollower : MonoBehaviour {
     void Update () {
 		// not exactly sure why this works but it flips look at
 		transform.LookAt(2 * transform.position - cam.transform.position);
+       
 	}
 }

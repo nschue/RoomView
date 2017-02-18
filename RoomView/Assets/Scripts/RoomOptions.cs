@@ -51,7 +51,7 @@ public class RoomOptions : MonoBehaviour {
     public void optionsOn()
     {
        gameObject.SetActive(true);
-       transform.position = Camera.main.transform.position + Camera.main.transform.forward * 3.0f;
+       transform.position = Camera.main.transform.position + Camera.main.transform.forward * 6.0f;
       
         optionsDisplaying = true;
     }

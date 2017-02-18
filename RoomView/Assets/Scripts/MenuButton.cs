@@ -41,7 +41,7 @@ public class MenuButton : MonoBehaviour {
     {
         if(e.target == GetComponent<Collider>().transform)
         {
-            gameObject.GetComponent<Text>().color = Color.green;
+            gameObject.GetComponent<Text>().color = Color.blue;
             controllerInput.TriggerClicked += OnSelectButton;
         }
     }
