@@ -9,8 +9,17 @@ public class CatalogManager : MonoBehaviour {
 	private int catalogStart;
 	private int catalogStop;
 	private bool isActive = false;
-
-	private UnityEngine.UI.Image[] previews;
+    //
+    private int[] indexInFilteredCatalog;
+    private int filteredCatalogSize;
+    private int filtCatalogStart;
+    private int filtCatalogStop;
+    private bool filterActive = false;
+    private UnityEngine.UI.Text titleText;
+    private ObjectCategory.ROOMCODE filtRoomCode = ObjectCategory.ROOMCODE.ALL;
+    private ObjectCategory.OBJECTTYPE filtTypeCode = ObjectCategory.OBJECTTYPE.ALL;
+    //
+    private UnityEngine.UI.Image[] previews;
 	private UnityEngine.UI.Image[] backs;
 
 	public Canvas catalogCanvas;
@@ -20,10 +29,13 @@ public class CatalogManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-		catalog = Resources.LoadAll<GameObject>("Prefabs");
+        titleText = GameObject.Find("Title Text").GetComponent<UnityEngine.UI.Text>();
+        titleText.text = "Catalog > Room: All    Category: All";
+        catalog = Resources.LoadAll<GameObject>("Prefabs");
 		catalogSize = catalog.Length;
-		catalogStart = 0;
-		LoadAllObjectPreviews();
+        indexInFilteredCatalog = new int[catalogSize];
+        catalogStart = 0;
+		
 
 		if (catalogSize > 6)
 			catalogStop = 6;
@@ -45,10 +57,40 @@ public class CatalogManager : MonoBehaviour {
 		backs[4] = GameObject.Find("Back5").GetComponent<UnityEngine.UI.Image>();
 		backs[5] = GameObject.Find("Back6").GetComponent<UnityEngine.UI.Image>();
 
-		ShowObjectPreviews();
-		catalogCanvas.gameObject.SetActive(false);
+        StartCoroutine(LoadAllObjectPreviewsCo()); //LoadAllObjectPreviews();
+        //ShowObjectPreviews();
+        catalogCanvas.gameObject.SetActive(false);
 
         controllerInput.MenuButtonClicked += displayCatalog;
+    }
+
+    IEnumerator LoadAllObjectPreviewsCo()
+    {
+        catalogPreviews = new Sprite[catalogSize];
+        Texture2D texture;
+        Sprite newSprite;
+
+        for (int i = 0; i < catalogSize; i++)
+        {
+            UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
+        }
+
+        Debug.Log("Waiting for load");
+        yield return new WaitForSeconds(2.0f);
+        Debug.Log("Done Loading");
+
+
+        for (int i = 0; i < catalogSize; i++)
+        {
+
+            texture = null;
+            texture = UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
+            newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            catalogPreviews[i] = newSprite;
+        }
+
+        ShowObjectPreviews();
+        yield return null;
     }
 
     public virtual void displayCatalog(object sender, ClickedEventArgs e)
@@ -59,7 +101,7 @@ public class CatalogManager : MonoBehaviour {
             catOn();
 
     }
-
+    /*
     private void LoadAllObjectPreviews() {
 		catalogPreviews = new Sprite[catalogSize];
 
@@ -77,6 +119,7 @@ public class CatalogManager : MonoBehaviour {
 		Sprite newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 		return newSprite;
 	}
+    */
 
 	private void ShowObjectPreviews() {
 		int previewsToShow = catalogStop % 6;
@@ -238,60 +281,82 @@ public class CatalogManager : MonoBehaviour {
 	}
 
 	public void scrollForward() {
-		// check meed to scroll
-		if ( !isActive) {
-			Debug.LogWarning("Catalog off. Cannot Scroll");
-			return;
-		} else if (catalogStop == catalogSize) {
-			Debug.LogWarning("End of catalog reached");
-			return;
-		}
+        // check need to scroll
+        if (!isActive)
+        {
+            Debug.LogWarning("Catalog off. Cannot Scroll");
+            return;
+        }
+        else if (filterActive)
+        {
+            filtScrollForward();
+            return;
+        }
+        else if (catalogStop == catalogSize)
+        {
 
-		Debug.Log("Scrolling forward");
+            Debug.LogWarning("End of catalog reached");
+            return;
+        }
 
-		// remove buttons from view
-		toggleCatButtons(-1);
+
+        Debug.Log("Scrolling forward");
+
+        // remove buttons from view
+        toggleCatButtons(-1);
 
 
-		if ( catalogStop + 6 < catalogSize) {
-			catalogStart = catalogStop;
-			catalogStop += 6;
-		}
-		else {
-			catalogStart = catalogStop;
-			catalogStop = catalogSize;
-		}
+        if (catalogStop + 6 < catalogSize)
+        {
+            catalogStart = catalogStop;
+            catalogStop += 6;
+        }
+        else
+        {
+            catalogStart = catalogStop;
+            catalogStop = catalogSize;
+        }
 
-		ShowObjectPreviews();
-	}
+        ShowObjectPreviews();
+    }
 
 	public void scrollBackward() {
-		// check meed to scroll
-		if (!isActive) {
-			Debug.LogWarning("Catalog off. Cannot Scroll");
-			return;
-		} else if (catalogStart == 0) {
-			Debug.LogWarning("Start of catalog reached");
-			return;
-		}
+        // check need to scroll
+        if (!isActive)
+        {
+            Debug.LogWarning("Catalog off. Cannot Scroll");
+            return;
+        }
+        else if (filterActive)
+        {
+            filtScrollBackward();
+            return;
+        }
+        else if (catalogStart == 0)
+        {
+            Debug.LogWarning("Start of catalog reached");
+            return;
+        }
 
-		Debug.Log("Scrolling back");
+        Debug.Log("Scrolling back");
 
-		// remove buttons from view
-		toggleCatButtons(-1);
+        // remove buttons from view
+        toggleCatButtons(-1);
 
-		if (catalogStart - 6 < 0) {
-			catalogStop = catalogStart;
-			catalogStart = 0;
-		}
-		else {
-			
-			catalogStop = catalogStart;
-			catalogStart = catalogStart - 6;
-		}
+        if (catalogStart - 6 < 0)
+        {
+            catalogStop = catalogStart;
+            catalogStart = 0;
+        }
+        else
+        {
 
-		ShowObjectPreviews();
-	}
+            catalogStop = catalogStart;
+            catalogStart = catalogStart - 6;
+        }
+
+        ShowObjectPreviews();
+    }
 
 
 
@@ -349,10 +414,203 @@ public class CatalogManager : MonoBehaviour {
 			return;
 		}
 
-		int index = (buttonID - 1) + catalogStart;
+        Debug.Log("ButtonID: " + buttonID);
 
-        GameObject spawn = catalog[index];
-        spawn.GetComponent<Furniture>().fromCatalog = true;
-		Instantiate(spawn, location, catalog[index].transform.rotation);
-	}
+        int index;
+        if (!filterActive)
+        {
+            index = (buttonID - 1) + catalogStart;
+            Instantiate(catalog[index], location, catalog[index].transform.rotation);
+        }
+        else
+        {
+            index = (buttonID - 1) + filtCatalogStart;
+            Instantiate(catalog[indexInFilteredCatalog[index]], location, catalog[index].transform.rotation);
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // code for filters
+    public ObjectCategory.ROOMCODE FiltRoomCode
+    {
+        get
+        {
+            return filtRoomCode;
+        }
+
+        set
+        {
+            filtRoomCode = value;
+            //print("Room Filter: " + filtRoomCode);
+            getFilteredObjects();
+            //print("Room Filter: " + filtRoomCode);
+            titleText.text = "Catalog > Room: " + filtRoomCode + "    Category: " + filtTypeCode;
+        }
+    }
+
+    public ObjectCategory.OBJECTTYPE FiltTypeCode
+    {
+        get
+        {
+            return filtTypeCode;
+        }
+
+        set
+        {
+            filtTypeCode = value;
+            //print("Type Filter: " + filtTypeCode);
+            getFilteredObjects();
+            titleText.text = "Catalog > Room: " + filtRoomCode + "    Category: " + filtTypeCode;
+        }
+    }
+
+    private void getFilteredObjects()
+    {
+        filteredCatalogSize = 0;
+        filtCatalogStart = 0;
+        filtCatalogStop = 0;
+
+        if (filtRoomCode == ObjectCategory.ROOMCODE.ALL && filtTypeCode == ObjectCategory.OBJECTTYPE.ALL)
+        {
+            filterActive = false;
+            catalogStart = 0;
+            if (catalogSize > 6)
+                catalogStop = 6;
+            else
+                catalogStop = catalogSize;
+
+            ShowObjectPreviews();
+            return;
+        }
+        else if (!(filtRoomCode == ObjectCategory.ROOMCODE.ALL) && !(filtTypeCode == ObjectCategory.OBJECTTYPE.ALL))
+        {
+            for (int i = 0; i < catalogSize; i++)
+            {
+                if (catalog[i].GetComponent<ObjectCategory>().roomType == filtRoomCode && catalog[i].GetComponent<ObjectCategory>().objectType == filtTypeCode)
+                {
+                    indexInFilteredCatalog[filteredCatalogSize] = i;
+                    filteredCatalogSize++;
+                }
+            }
+        }
+        else if (!(filtRoomCode == ObjectCategory.ROOMCODE.ALL) && (filtTypeCode == ObjectCategory.OBJECTTYPE.ALL))
+        {
+            for (int i = 0; i < catalogSize; i++)
+            {
+                if (catalog[i].GetComponent<ObjectCategory>().roomType == filtRoomCode)
+                {
+                    indexInFilteredCatalog[filteredCatalogSize] = i;
+                    filteredCatalogSize++;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < catalogSize; i++)
+            {
+                if (catalog[i].GetComponent<ObjectCategory>().objectType == filtTypeCode)
+                {
+                    indexInFilteredCatalog[filteredCatalogSize] = i;
+                    filteredCatalogSize++;
+                }
+            }
+        }
+
+        filterActive = true;
+
+        filtCatalogStart = 0;
+        if (filteredCatalogSize > 6)
+            filtCatalogStop = 6;
+        else
+            filtCatalogStop = filteredCatalogSize;
+
+        ShowFilteredPreviews();
+    }
+
+    private void ShowFilteredPreviews()
+    {
+        int previewsToShow;
+
+        previewsToShow = filtCatalogStop % 6;
+        if (filteredCatalogSize == 0)
+        {
+            toggleCatButtons(-1);
+            return;
+        }
+        else
+            toggleCatButtons(previewsToShow);
+
+        for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
+        {
+            previews[i].sprite = catalogPreviews[indexInFilteredCatalog[showing]];
+        }
+    }
+
+    public void filtScrollForward()
+    {
+        // check meed to scroll
+        if (!isActive)
+        {
+            Debug.LogWarning("Catalog off. Cannot Scroll");
+            return;
+        }
+        else if (filtCatalogStop == filteredCatalogSize)
+        {
+            Debug.LogWarning("End of catalog reached");
+            return;
+        }
+
+        Debug.Log("Scrolling forward");
+
+        // remove buttons from view
+        toggleCatButtons(-1);
+
+
+        if (filtCatalogStop + 6 < filteredCatalogSize)
+        {
+            filtCatalogStart = filtCatalogStop;
+            catalogStop += 6;
+        }
+        else
+        {
+            filtCatalogStart = filtCatalogStop;
+            filtCatalogStop = filteredCatalogSize;
+        }
+
+        ShowFilteredPreviews();
+    }
+
+    public void filtScrollBackward()
+    {
+        // check meed to scroll
+        if (!isActive)
+        {
+            Debug.LogWarning("Catalog off. Cannot Scroll");
+            return;
+        }
+        else if (filtCatalogStart == 0)
+        {
+            Debug.LogWarning("Start of catalog reached");
+            return;
+        }
+
+        Debug.Log("Scrolling back");
+
+        // remove buttons from view
+        toggleCatButtons(-1);
+
+        if (filtCatalogStart - 6 < 0)
+        {
+            filtCatalogStop = filtCatalogStart;
+            filtCatalogStart = 0;
+        }
+        else
+        {
+
+            filtCatalogStop = filtCatalogStart;
+            filtCatalogStart = filtCatalogStart - 6;
+        }
+
+        ShowFilteredPreviews();
+    }
 }
