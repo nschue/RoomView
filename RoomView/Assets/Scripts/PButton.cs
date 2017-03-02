@@ -12,24 +12,38 @@ public class PButton : MenuButton
 
     public action selectedAction;
 
+    private GameObject levelManager;
+    private LoadSubMenu subMenu;
+
+    public void Start()
+    {
+        levelManager = GameObject.Find("LevelManager");
+        subMenu = gameObject.AddComponent<LoadSubMenu>();
+    }
+
+
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {
         switch (selectedAction)
         {
             case action.reset:
-                //TODO reset scene
+                levelManager.GetComponent<LevelManager>().ResetLevel();
                 break;
 
             case action.load:
-                //TODO load scene 
+                subMenu.hideMenus = new string[] {"Pause Menu"};
+                subMenu.showMenus = new string[] {"Load Menu"};
+                subMenu.OnSelectButton(sender, e);
                 break;
 
             case action.save:
-                //TODO save scene
+                subMenu.hideMenus = new string[] { "Pause Menu" };
+                subMenu.showMenus = new string[] { "Save Menu" };
+                subMenu.OnSelectButton(sender, e);
                 break;
 
             case action.exit:
-                //TODO exit to main menu
+                levelManager.GetComponent<LevelManager>().LoadLevel("Start");
                 break;
 
             default:

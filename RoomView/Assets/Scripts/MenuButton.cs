@@ -6,7 +6,10 @@ using UnityEngine.UI;
 public class MenuButton : MonoBehaviour {
 
     public SteamVR_TrackedObject controller;
+
+    [HideInInspector]
     public SteamVR_TrackedController controllerInput;
+    [HideInInspector]
     public SteamVR_LaserPointer pointer;
     
 

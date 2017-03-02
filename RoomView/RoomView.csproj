@@ -108,6 +108,7 @@
     <Compile Include="Assets\Scripts\PButton.cs" />
     <Compile Include="Assets\Scripts\RoomOptions.cs" />
     <Compile Include="Assets\Scripts\RoomSelectionMenu.cs" />
+    <Compile Include="Assets\Scripts\SaveButton.cs" />
     <Compile Include="Assets\Scripts\TeleportController.cs" />
     <Compile Include="Assets\Scripts\UI_Follower.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_GazeTracker.cs" />
@@ -211,6 +212,24 @@
     <Compile Include="Assets\SteamVR\Scripts\SteamVR_TrackedObject.cs" />
     <Compile Include="Assets\SteamVR\Scripts\SteamVR_UpdatePoses.cs" />
     <Compile Include="Assets\SteamVR\Scripts\SteamVR_Utils.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Attributes\USLUAttributes.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\ExampleScriptsAndClasses\TestClass.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\ExampleScriptsAndClasses\TestScript.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Non-Mono Classes\ObjectComponent.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Non-Mono Classes\SaveGame.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Non-Mono Classes\SceneObject.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\ObjectIdentifier.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\PersistenceMarker.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\SaveLoad.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\SaveLoadMenu.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\SaveLoadUtility.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Surrogates\Color32Surrogate.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Surrogates\ColorSurrogate.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Surrogates\QuaternionSurrogate.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Surrogates\Vector2Surrogate.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Surrogates\Vector3Surrogate.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Surrogates\Vector4Surrogate.cs" />
+    <Compile Include="Assets\Unity Save Load Utility\Utilities\TypeSystem.cs" />
     <Compile Include="Assets\VRSampleScenes\Scripts\Common\SessionData.cs" />
     <Compile Include="Assets\VRSampleScenes\Scripts\Examples\ExampleInteractiveItem.cs" />
     <Compile Include="Assets\VRSampleScenes\Scripts\Examples\ExampleRenderScale.cs" />
@@ -272,7 +291,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\BriansHouse\Source\Shader\GlassStainedBumpDistort.shader" />
-    <None Include="Assets\Materials\OutlineShader.shader" />
+    <None Include="Assets\Materials\UI Overlay.shader" />
     <None Include="Assets\Plugins\Android\Assets\OSIG_Readme.txt" />
     <None Include="Assets\SteamVR\InteractionSystem\Core\Shaders\SeeThru.shader" />
     <None Include="Assets\SteamVR\InteractionSystem\Core\Shaders\Silhouette.shader" />

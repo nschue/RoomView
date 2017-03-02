@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Create a sub menu 
 public class LoadSubMenu : MenuButton {
 
     public string[] hideMenus;//Include a tag for each menu that should be hidden

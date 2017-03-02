@@ -33,7 +33,13 @@ public class CatalogManager : MonoBehaviour {
         titleText.text = "Catalog > Room: All    Category: All";
         catalog = Resources.LoadAll<GameObject>("Prefabs");
 		catalogSize = catalog.Length;
+        //
+        if (catalogSize > 49)
+            catalogSize = 49;
+
+        //
         indexInFilteredCatalog = new int[catalogSize];
+        catalogPreviews = new Sprite[catalogSize];
         catalogStart = 0;
 		
 
@@ -60,13 +66,13 @@ public class CatalogManager : MonoBehaviour {
         StartCoroutine(LoadAllObjectPreviewsCo()); //LoadAllObjectPreviews();
         //ShowObjectPreviews();
         catalogCanvas.gameObject.SetActive(false);
-
+        Debug.Log("input");
         controllerInput.MenuButtonClicked += displayCatalog;
     }
 
     IEnumerator LoadAllObjectPreviewsCo()
     {
-        catalogPreviews = new Sprite[catalogSize];
+        //catalogPreviews = new Sprite[catalogSize];
         Texture2D texture;
         Sprite newSprite;
 
@@ -75,9 +81,9 @@ public class CatalogManager : MonoBehaviour {
             UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
         }
 
-        Debug.Log("Waiting for load");
+        Debug.Log("Waiting  to load "+catalogSize + " objects");
         yield return new WaitForSeconds(2.0f);
-        Debug.Log("Done Loading");
+        
 
 
         for (int i = 0; i < catalogSize; i++)
@@ -85,7 +91,19 @@ public class CatalogManager : MonoBehaviour {
 
             texture = null;
             texture = UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
+            if(texture == null)
+            {
+                Debug.Log("wating");
+                yield return new WaitForSeconds(0.1f);
+                i--;
+                continue;
+            }
+                
+
+
+            Debug.Log("loading " + i);
             newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            Debug.Log("loaded " + i);
             catalogPreviews[i] = newSprite;
         }
 
@@ -101,25 +119,7 @@ public class CatalogManager : MonoBehaviour {
             catOn();
 
     }
-    /*
-    private void LoadAllObjectPreviews() {
-		catalogPreviews = new Sprite[catalogSize];
 
-		for(int i = 0; i < catalogSize; i++) {
-			catalogPreviews[i] = getPreviewSprite(catalog[i]);
-		}
-	}
-
-	private Sprite getPreviewSprite(GameObject prefab) {
-		Texture2D texture = UnityEditor.AssetPreview.GetAssetPreview(prefab);
-		if(texture == null) {
-			UnityEditor.AssetPreview.GetAssetPreview(prefab);
-		}
-
-		Sprite newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-		return newSprite;
-	}
-    */
 
 	private void ShowObjectPreviews() {
 		int previewsToShow = catalogStop % 6;
@@ -441,7 +441,7 @@ public class CatalogManager : MonoBehaviour {
         set
         {
             filtRoomCode = value;
-            //print("Room Filter: " + filtRoomCode);
+            print("Room Filter: " + filtRoomCode);
             getFilteredObjects();
             //print("Room Filter: " + filtRoomCode);
             titleText.text = "Catalog > Room: " + filtRoomCode + "    Category: " + filtTypeCode;
@@ -497,6 +497,7 @@ public class CatalogManager : MonoBehaviour {
         {
             for (int i = 0; i < catalogSize; i++)
             {
+                //Debug.Log(catalog[i].name);
                 if (catalog[i].GetComponent<ObjectCategory>().roomType == filtRoomCode)
                 {
                     indexInFilteredCatalog[filteredCatalogSize] = i;

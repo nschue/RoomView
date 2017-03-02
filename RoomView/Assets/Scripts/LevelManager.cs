@@ -11,4 +11,10 @@ public class LevelManager : MonoBehaviour {
     {
         SceneManager.LoadScene(name);
     }
+
+    public void ResetLevel()
+    {
+        int scene = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
+    }
 }
