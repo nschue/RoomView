@@ -57,28 +57,9 @@ public class Furniture : MonoBehaviour {
         }
     }
 
-    private void OnEnable()
-    {
-        if (fromCatalog)
-        {
-            isMove = false;
-            needsPlacement = true;
-            gameObject.layer = 2;
-            pointer = GameObject.Find("Controller (right)").GetComponent<SteamVR_LaserPointer>();
-            controllerInput = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedController>();
-
-        }
-        else
-        {
-            pointer.PointerIn += OnHover;
-            pointer.PointerOut += OffHover;
-            controllerInput.PadClicked += OnPadClicked;
-        }
-
-    }
-
     void Start()
     {
+        contextMenuPrefab = Resources.Load("UI Prefabs/ContextMenu") as GameObject;
         id = GetComponent<ObjectCategory>().objectID;
         
         if (!isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
@@ -89,15 +70,29 @@ public class Furniture : MonoBehaviour {
             materialArray = materials.ToArray();
             materialArrayWithHighlight = newMaterials.ToArray();
         }
+        else
+        {
+            pointer.PointerIn += OnHover;
+            pointer.PointerOut += OffHover;
+            controllerInput.PadClicked += OnPadClicked;
+        }
 
-        if(controller == null)
+        if (controller == null)
             controller = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedObject>();
 
         if(controllerInput == null)
+        {
             controllerInput = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedController>();
-
+            controllerInput.PadClicked += OnPadClicked;
+        }
+            
         if(pointer == null)
+        {
             pointer = GameObject.Find("Controller (right)").GetComponent<SteamVR_LaserPointer>();
+            pointer.PointerIn += OnHover;
+            pointer.PointerOut += OffHover;
+        }
+           
 
     }
 

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class CatalogManager : MonoBehaviour {
 
@@ -101,9 +102,9 @@ public class CatalogManager : MonoBehaviour {
                 
 
 
-            Debug.Log("loading " + i);
+            //Debug.Log("loading " + i);
             newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-            Debug.Log("loaded " + i);
+            //Debug.Log("loaded " + i);
             catalogPreviews[i] = newSprite;
         }
 
@@ -114,12 +115,62 @@ public class CatalogManager : MonoBehaviour {
     public virtual void displayCatalog(object sender, ClickedEventArgs e)
     {
         if (isActive)
+        {
             catOff();
+        }
+
         else
+        {
             catOn();
+        }
+            
 
     }
 
+    //Move all GameObjects to IgnoreRaycast layer
+    private void raycastIgnoreOtherObjects()
+    {
+        GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+        foreach(GameObject gObject in sceneObjects)
+        {
+            GameObject parentObject;
+            Transform parentTransform = gObject.transform;
+            while (parentTransform.parent != null)
+            {
+                parentTransform = parentTransform.parent;
+            }
+            parentObject = parentTransform.gameObject;
+            if (parentObject != catalogCanvas.gameObject)
+            {
+                gObject.layer = 2;
+            }
+        }
+    }
+
+    //Move all GameObjects back to default layer
+    private void raycastHitOtherObjects()
+    {
+        GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+        foreach (GameObject gObject in sceneObjects)
+        {
+            GameObject parentObject;
+            Transform parentTransform = gObject.transform;
+            while(parentTransform.parent != null)
+            {
+                parentTransform = parentTransform.parent;
+            }
+            parentObject = parentTransform.gameObject;
+            if (parentObject != catalogCanvas)
+            {
+                if(parentObject.GetComponent<Furniture>() != null && parentObject.GetComponent<Furniture>().isMove)
+                {
+                    gObject.layer = 2;
+                }
+                else
+                    gObject.layer = 0;
+            }
+        }
+    }
 
 	private void ShowObjectPreviews() {
 		int previewsToShow = catalogStop % 6;
@@ -270,7 +321,8 @@ public class CatalogManager : MonoBehaviour {
 		ShowObjectPreviews();
 
 		isActive = false;
-	}
+        raycastHitOtherObjects();
+    }
 
 	public void catOn() {
 		Debug.Log("Catalog on");
@@ -278,7 +330,8 @@ public class CatalogManager : MonoBehaviour {
 		catalogCanvas.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 3.0f;
 
 		isActive = true;
-	}
+        raycastIgnoreOtherObjects();
+    }
 
 	public void scrollForward() {
         // check need to scroll
@@ -420,12 +473,16 @@ public class CatalogManager : MonoBehaviour {
         if (!filterActive)
         {
             index = (buttonID - 1) + catalogStart;
-            Instantiate(catalog[index], location, catalog[index].transform.rotation);
+            GameObject furniture = Instantiate(catalog[index], location, catalog[index].transform.rotation);
+            furniture.gameObject.layer = 2;
+            furniture.GetComponent<Furniture>().isMove = true;
         }
         else
         {
             index = (buttonID - 1) + filtCatalogStart;
-            Instantiate(catalog[indexInFilteredCatalog[index]], location, catalog[index].transform.rotation);
+            GameObject furniture = Instantiate(catalog[indexInFilteredCatalog[index]], location, catalog[index].transform.rotation);
+            furniture.gameObject.layer = 2;
+            furniture.GetComponent<Furniture>().isMove = true;
         }
     }
 

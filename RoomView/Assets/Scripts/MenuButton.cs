@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class MenuButton : MonoBehaviour {
 
+
+    [HideInInspector]
     public SteamVR_TrackedObject controller;
 
     [HideInInspector]
@@ -53,7 +55,7 @@ public class MenuButton : MonoBehaviour {
     {
         if(e.target == GetComponent<Collider>().transform)
         {
-            gameObject.GetComponent<Text>().color = Color.black;
+            gameObject.GetComponent<Text>().color = Color.white;
             controllerInput.TriggerClicked -= OnSelectButton;
         }
     }
