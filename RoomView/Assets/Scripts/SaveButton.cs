@@ -42,7 +42,6 @@ public class SaveButton : MenuButton {
         }
     }
 	
-	// Update is called once per frame
 
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {

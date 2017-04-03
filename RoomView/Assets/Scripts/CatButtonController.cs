@@ -47,14 +47,17 @@ public class CatButtonController : MonoBehaviour {
     {
         if (buttonSelected)
         {
-            isSelected = false;
-            buttonSelected = false;
-            turnOff();
+            //isSelected = false;
+            //buttonSelected = false;
+            //turnOff();
 
 
             if (buttonID <= 6)
             {
                 catalogManager.spawnByCatalogButton(buttonID, new Vector3(0, -100));
+                isSelected = false;
+                buttonSelected = false;
+                turnOff();
                 catalogManager.catOff();
             }
             else

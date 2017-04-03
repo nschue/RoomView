@@ -92,7 +92,9 @@ public class Furniture : MonoBehaviour {
             pointer.PointerIn += OnHover;
             pointer.PointerOut += OffHover;
         }
-           
+        ObjectIdentifier objectIdentifier = gameObject.GetComponent<ObjectIdentifier>();
+        objectIdentifier.id = gameObject.GetComponent<ObjectCategory>().objectID.ToString();
+        objectIdentifier.componentSaveMode = ObjectIdentifier.ComponentSaveMode.All;
 
     }
 

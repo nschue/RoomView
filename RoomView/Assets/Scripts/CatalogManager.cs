@@ -9,7 +9,7 @@ public class CatalogManager : MonoBehaviour {
 	private int catalogSize;
 	private int catalogStart;
 	private int catalogStop;
-	private bool isActive = false;
+	
     //
     private int[] indexInFilteredCatalog;
     private int filteredCatalogSize;
@@ -26,6 +26,8 @@ public class CatalogManager : MonoBehaviour {
 	public Canvas catalogCanvas;
     public SteamVR_TrackedController controllerInput;
 
+    [HideInInspector]
+    public bool isActive = false;
 
 
     // Use this for initialization
@@ -347,7 +349,6 @@ public class CatalogManager : MonoBehaviour {
         }
         else if (catalogStop == catalogSize)
         {
-
             Debug.LogWarning("End of catalog reached");
             return;
         }
