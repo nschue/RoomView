@@ -60,13 +60,13 @@ public class RoomOptions : MonoBehaviour {
     {      
         gameObject.SetActive(true);
 
-        catManIsActive = menuManager.GetComponent<MenuManager>().catalogActive; //Get current state of catalogManager
+        //catManIsActive = menuManager.GetComponent<MenuManager>().catalogActive; //Get current state of catalogManager
         //Working on making a MenuManager to store all of the current states of our menus, trying close all menus when the pause menu is opened. 
         //When the pause menu is closed, reopen whatever menus were open again.
-        if (catManIsActive)
-        {
-            menuManager.GetComponent<CatalogManager>().catOff();//If active, turn it off
-        }
+        //if (catManIsActive)
+        //{
+        //    menuManager.GetComponent<CatalogManager>().catOff();//If active, turn it off
+        //}
         transform.position = Camera.main.transform.position + Camera.main.transform.forward * 6.0f;
       
         optionsDisplaying = true;
@@ -81,7 +81,7 @@ public class RoomOptions : MonoBehaviour {
 
         if (catManIsActive)
         {
-            prefabCatalog.GetComponent<CatalogManager>().catOn();//If it was active, turn it back on
+            //prefabCatalog.GetComponent<CatalogManager>().catOn();//If it was active, turn it back on
         }
     }
 
