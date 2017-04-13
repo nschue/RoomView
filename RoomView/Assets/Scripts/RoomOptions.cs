@@ -23,7 +23,7 @@ public class RoomOptions : MonoBehaviour {
 
     void Start()
     {
-        menuManager = GameObject.Find("MenuManager");
+        menuManager = GameObject.Find("MenuManager"); // not in use newDemo scene currently 4/12/17 gives exception
         if(menuManager == null)
         {
             Debug.LogError("menuManager not found");

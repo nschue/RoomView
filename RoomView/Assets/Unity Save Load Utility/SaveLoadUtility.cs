@@ -206,11 +206,17 @@ public class SaveLoadUtility : MonoBehaviour {
 				//Convert the GameObject's data into a form that can be serialized (an instance of SceneObject),
 				//and add it to the SaveGame instance's list of SceneObjects.
 				newSaveGame.sceneObjects.Add(PackGameObject(oi.gameObject, oi));
+                Debug.Log("Lets see what the list count is");
+                Debug.Log(newSaveGame.sceneObjects.Count);
+
 			}
 		}
 
-		//Call the static method that serializes our SaveGame instance and writes the data to a file.
-		SaveLoad.SaveScene(newSaveGame, pathToUse);
+        //Call the static method that serializes our SaveGame instance and writes the data to a file.
+        
+        SaveLoad.SaveScene(newSaveGame, pathToUse);
+      
+
 		if(debugController.gameSaved) {
 			Debug.Log("Game Saved: " + newSaveGame.savegameName + " (" + newSaveGame.saveDate + ").");
 		}
@@ -242,7 +248,12 @@ public class SaveLoadUtility : MonoBehaviour {
 
 		//Call the static method that will attempt to load the specified file and deserialize it's data into a form that we can use
 		SaveGame loadedGame = SaveLoad.LoadScene(saveGameName, pathToUse);
-		if(loadedGame == null) {
+        Debug.Log("The following objects are being loaded:");
+        Debug.Log( loadedGame.sceneObjects[0].prefabName);
+        //Debug.Log(loadedGame.sceneObjects[1].prefabName); // removed because was giving argumentoutofrangeexception Jose R. 4/12/17 8:17 PM
+
+
+        if (loadedGame == null) {
 			Debug.Log("[LoadGame] " + "saveGameName " + saveGameName + " couldn't be found!");
 			return;
 		}
@@ -252,201 +263,261 @@ public class SaveLoadUtility : MonoBehaviour {
 		//and you might want to access it in your scripts' OnLoad function so you don't ahve to load all Ois again and again.
 		SaveLoad.objectIdentifierDict = new Dictionary<string, ObjectIdentifier>();
 
-		//iterate through the loaded SaveGame's sceneObjects list to access each stored object's data and reconstruct/unpack it with all it's components
-		//Simultaneously, add the loaded GameObject's ObjectIdentifier to the SaveLoad.objectIdentifierDict.
-		foreach(SceneObject loadedObject in loadedGame.sceneObjects) {
-			GameObject go = UnpackGameObject(loadedObject, null);
+        //iterate through the loaded SaveGame's sceneObjects list to access each stored object's data and reconstruct/unpack it with all it's components
+        //Simultaneously, add the loaded GameObject's ObjectIdentifier to the SaveLoad.objectIdentifierDict.
+        try
+        {
+            foreach (SceneObject loadedObject in loadedGame.sceneObjects)
+            {
+                Debug.Log("loadedObject = " + loadedObject.prefabName);
+                GameObject go = UnpackGameObject(loadedObject, null);
+                //Debug.Log("Loading" + go.GetComponent<ObjectIdentifier>().prefabName);
 
-			if(go != null) {
-				//Add the reconstructed GameObject to the list we created earlier.
-				ObjectIdentifier oi = go.GetComponent<ObjectIdentifier>();
-				SaveLoad.objectIdentifierDict.Add(oi.id, oi);
-			}
-		}
+                if (go != null)
+                {
+                    //Add the reconstructed GameObject to the list we created earlier.
+                    ObjectIdentifier oi = go.GetComponent<ObjectIdentifier>();
+                    SaveLoad.objectIdentifierDict.Add(oi.id, oi);
+                }
+                Debug.Log("loadedObject is loaded");
+            }
+            Debug.Log("Made it past the foreach in load");
+            //Go through the dictionary of reconstructed GameObjects and try to reassign any missing children, and reset the localPosition
+            if (true)
+            {
+                foreach (KeyValuePair<string, ObjectIdentifier> pair in SaveLoad.objectIdentifierDict)
+                {
+                    ObjectIdentifier oi = pair.Value;
+                    if (string.IsNullOrEmpty(oi.idParent) == false)
+                    {
+                        if (SaveLoad.objectIdentifierDict.ContainsKey(oi.idParent))
+                        {
+                            Vector3 pos = oi.transform.position;
+                            oi.transform.parent = SaveLoad.objectIdentifierDict[oi.idParent].transform;
+                            oi.transform.localPosition = pos;
+                        }
+                    }
+                }
+            }
 
-		//Go through the dictionary of reconstructed GameObjects and try to reassign any missing children, and reset the localPosition
-		if(true) {
-			foreach(KeyValuePair<string,ObjectIdentifier> pair in SaveLoad.objectIdentifierDict) {
-				ObjectIdentifier oi = pair.Value;
-				if(string.IsNullOrEmpty(oi.idParent) == false) {
-					if(SaveLoad.objectIdentifierDict.ContainsKey(oi.idParent)) {
-						Vector3 pos = oi.transform.position;
-						oi.transform.parent = SaveLoad.objectIdentifierDict[oi.idParent].transform;
-						oi.transform.localPosition = pos;
-					}
-				}
-			}
-		}
-
-		//Now comes a quite ugly part. It will only come into play if you have loaded any members (field or properties) that held references to GameObjects or Components.
-		//Basically, when we went through each member (field/property) and it was a GameObject or Component reference, 
-		//this field along with the referenced object's id (and some other information) is added to refDict.
-		//We now go through each key of refDict and try to find to referenced object (GameObject or Component) so we can add that value to the field or property.
-		if(true) {
-			foreach(KeyValuePair<RefReconnecter, string> pair in refDict) {
+            //Now comes a quite ugly part. It will only come into play if you have loaded any members (field or properties) that held references to GameObjects or Components.
+            //Basically, when we went through each member (field/property) and it was a GameObject or Component reference, 
+            //this field along with the referenced object's id (and some other information) is added to refDict.
+            //We now go through each key of refDict and try to find to referenced object (GameObject or Component) so we can add that value to the field or property.
+            if (true)
+            {
+                foreach (KeyValuePair<RefReconnecter, string> pair in refDict)
+                {
 
 
-				RefReconnecter refRec = pair.Key;
-				object valueToSet = new object();
-				Type fieldType = refRec.field.FieldType;
+                    RefReconnecter refRec = pair.Key;
+                    object valueToSet = new object();
+                    Type fieldType = refRec.field.FieldType;
 
-				if(debugController.currentRefRec) {
-					Debug.Log("[LoadGame] " + "Current RefReconnecter: " + refRec.baseInstance.GetType().Name + "/" + refRec.field.Name + " (" + fieldType + ")");
-				}
+                    if (debugController.currentRefRec)
+                    {
+                        Debug.Log("[LoadGame] " + "Current RefReconnecter: " + refRec.baseInstance.GetType().Name + "/" + refRec.field.Name + " (" + fieldType + ")");
+                    }
 
-				if(refRec.collectionType == CollectionType.None) {
-					ObjectIdentifier oi = SaveLoad.objectIdentifierDict[pair.Value];
+                    if (refRec.collectionType == CollectionType.None)
+                    {
+                        ObjectIdentifier oi = SaveLoad.objectIdentifierDict[pair.Value];
 
-					if(fieldType == typeof(GameObject)) {
-						valueToSet = oi.gameObject;
-					}
-					else {
-						Component component = oi.GetComponent(fieldType.Name.ToString());
-						if(component != null) {
-							valueToSet = component;
-						}
-					}
-				}
-				else {
-					Type elementType = TypeSystem.GetElementType(fieldType);
-					Dictionary<string,object> fieldValueDict = refRec.loadedValue as Dictionary<string,object>;
+                        if (fieldType == typeof(GameObject))
+                        {
+                            valueToSet = oi.gameObject;
+                        }
+                        else
+                        {
+                            Component component = oi.GetComponent(fieldType.Name.ToString());
+                            if (component != null)
+                            {
+                                valueToSet = component;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Type elementType = TypeSystem.GetElementType(fieldType);
+                        Dictionary<string, object> fieldValueDict = refRec.loadedValue as Dictionary<string, object>;
 
-					if(refRec.collectionType == CollectionType.Array) {
-						Array array = Array.CreateInstance(elementType, fieldValueDict.Count);
-						foreach(KeyValuePair<string,object> pair_fvd in fieldValueDict) {
-							if(pair_fvd.Value == null) {
-								continue;
-							}
-							if(SaveLoad.objectIdentifierDict.ContainsKey(pair_fvd.Value.ToString())) {
-								ObjectIdentifier oi = SaveLoad.objectIdentifierDict[pair_fvd.Value.ToString()];
-								if(elementType == typeof(GameObject)) {
-									array.SetValue(oi.gameObject,Int32.Parse(pair_fvd.Key));
-								}
-								else {
-									array.SetValue(oi.GetComponent(elementType),Int32.Parse(pair_fvd.Key));
-								}
-							}
-						}
-						valueToSet = array;
-					}
-					else if(refRec.collectionType == CollectionType.List) {
-						object list = Activator.CreateInstance(fieldType);
-						MethodInfo listAddMethod = fieldType.GetMethod( "Add" );
+                        if (refRec.collectionType == CollectionType.Array)
+                        {
+                            Array array = Array.CreateInstance(elementType, fieldValueDict.Count);
+                            foreach (KeyValuePair<string, object> pair_fvd in fieldValueDict)
+                            {
+                                if (pair_fvd.Value == null)
+                                {
+                                    continue;
+                                }
+                                if (SaveLoad.objectIdentifierDict.ContainsKey(pair_fvd.Value.ToString()))
+                                {
+                                    ObjectIdentifier oi = SaveLoad.objectIdentifierDict[pair_fvd.Value.ToString()];
+                                    if (elementType == typeof(GameObject))
+                                    {
+                                        array.SetValue(oi.gameObject, Int32.Parse(pair_fvd.Key));
+                                    }
+                                    else
+                                    {
+                                        array.SetValue(oi.GetComponent(elementType), Int32.Parse(pair_fvd.Key));
+                                    }
+                                }
+                            }
+                            valueToSet = array;
+                        }
+                        else if (refRec.collectionType == CollectionType.List)
+                        {
+                            object list = Activator.CreateInstance(fieldType);
+                            MethodInfo listAddMethod = fieldType.GetMethod("Add");
 
-						foreach(KeyValuePair<string,object> pair_fvd in fieldValueDict) {
-							if(pair_fvd.Value == null) {
-								listAddMethod.Invoke( list, new object[] {null} );
-								continue;
-							}
-							if(SaveLoad.objectIdentifierDict.ContainsKey(pair_fvd.Value.ToString())) {
-								ObjectIdentifier oi = SaveLoad.objectIdentifierDict[pair_fvd.Value.ToString()];
-								if(elementType == typeof(GameObject)) {
-									listAddMethod.Invoke( list, new object[] {oi.gameObject} );
-								}
-								else {
-									listAddMethod.Invoke( list, new object[] {oi.GetComponent(elementType)} );
-								}
-							}
-						}
+                            foreach (KeyValuePair<string, object> pair_fvd in fieldValueDict)
+                            {
+                                if (pair_fvd.Value == null)
+                                {
+                                    listAddMethod.Invoke(list, new object[] { null });
+                                    continue;
+                                }
+                                if (SaveLoad.objectIdentifierDict.ContainsKey(pair_fvd.Value.ToString()))
+                                {
+                                    ObjectIdentifier oi = SaveLoad.objectIdentifierDict[pair_fvd.Value.ToString()];
+                                    if (elementType == typeof(GameObject))
+                                    {
+                                        listAddMethod.Invoke(list, new object[] { oi.gameObject });
+                                    }
+                                    else
+                                    {
+                                        listAddMethod.Invoke(list, new object[] { oi.GetComponent(elementType) });
+                                    }
+                                }
+                            }
 
-						valueToSet = list;
-					}
-					else if(refRec.collectionType == CollectionType.Dictionary) {
+                            valueToSet = list;
+                        }
+                        else if (refRec.collectionType == CollectionType.Dictionary)
+                        {
 
-						Type keyType = fieldType.GetGenericArguments()[0];
-						Type valueType = fieldType.GetGenericArguments()[1];
+                            Type keyType = fieldType.GetGenericArguments()[0];
+                            Type valueType = fieldType.GetGenericArguments()[1];
 
-						bool inheritsFromComponent_keyType = SaveLoad.InheritsFrom(keyType, typeof(Component));
-						bool inheritsFromComponent_valueType = SaveLoad.InheritsFrom(valueType, typeof(Component));
+                            bool inheritsFromComponent_keyType = SaveLoad.InheritsFrom(keyType, typeof(Component));
+                            bool inheritsFromComponent_valueType = SaveLoad.InheritsFrom(valueType, typeof(Component));
 
-						object dictionary = Activator.CreateInstance(fieldType);
-						MethodInfo dictionaryAddMethod = fieldType.GetMethod("Add", new[] {keyType, valueType});
+                            object dictionary = Activator.CreateInstance(fieldType);
+                            MethodInfo dictionaryAddMethod = fieldType.GetMethod("Add", new[] { keyType, valueType });
 
-						ConvertedDictionary convDict = refRec.loadedValue as ConvertedDictionary;
+                            ConvertedDictionary convDict = refRec.loadedValue as ConvertedDictionary;
 
-						for(int i = 0; i < convDict.keys.Count; i++) {
+                            for (int i = 0; i < convDict.keys.Count; i++)
+                            {
 
-							//var newKey = Activator.CreateInstance(keyType);//Can't be used since String has no such initializer
-							object newKey = new object();
+                                //var newKey = Activator.CreateInstance(keyType);//Can't be used since String has no such initializer
+                                object newKey = new object();
 
-							if(keyType.Namespace == "System" || surrogateTypes.Contains(keyType.Name)) {
-								newKey = convDict.keys[i.ToString()];
-							}
-							else if(keyType == typeof(GameObject) || inheritsFromComponent_keyType == true) {
-								string refID = convDict.keys[i.ToString()].ToString();
-								if(SaveLoad.objectIdentifierDict.ContainsKey(refID)) {
-									ObjectIdentifier oi = SaveLoad.objectIdentifierDict[refID];
-									if(keyType == typeof(GameObject)) {
-										newKey = oi.gameObject;
-									}
-									else {
-										if(oi.GetComponent(keyType) != null) {
-											newKey = oi.GetComponent(keyType.Name);
-										}
-										else {
-											Debug.Log("[LoadGame] " + "oi.GetComponent(" + keyType + ") == null");
-										}
-									}
-								}
-							}
-							else {
-								Dictionary<string,object> keyDict = convDict.keys[i.ToString()] as Dictionary<string,object>;
-								SetValues(ref newKey, keyDict);
-							}
+                                if (keyType.Namespace == "System" || surrogateTypes.Contains(keyType.Name))
+                                {
+                                    newKey = convDict.keys[i.ToString()];
+                                }
+                                else if (keyType == typeof(GameObject) || inheritsFromComponent_keyType == true)
+                                {
+                                    string refID = convDict.keys[i.ToString()].ToString();
+                                    if (SaveLoad.objectIdentifierDict.ContainsKey(refID))
+                                    {
+                                        ObjectIdentifier oi = SaveLoad.objectIdentifierDict[refID];
+                                        if (keyType == typeof(GameObject))
+                                        {
+                                            newKey = oi.gameObject;
+                                        }
+                                        else
+                                        {
+                                            if (oi.GetComponent(keyType) != null)
+                                            {
+                                                newKey = oi.GetComponent(keyType.Name);
+                                            }
+                                            else
+                                            {
+                                                Debug.Log("[LoadGame] " + "oi.GetComponent(" + keyType + ") == null");
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<string, object> keyDict = convDict.keys[i.ToString()] as Dictionary<string, object>;
+                                    SetValues(ref newKey, keyDict);
+                                }
 
-							//var newValue = Activator.CreateInstance(valueType);
-							object newValue = new object();
+                                //var newValue = Activator.CreateInstance(valueType);
+                                object newValue = new object();
 
-							if(valueType.Namespace == "System" || surrogateTypes.Contains(valueType.Name)) {
-								newValue = convDict.values[i.ToString()];
-							}
-							else if(valueType == typeof(GameObject) || inheritsFromComponent_valueType == true) {
-								string refID =  convDict.values[i.ToString()].ToString();
-								if(SaveLoad.objectIdentifierDict.ContainsKey(refID)) {
-									ObjectIdentifier oi = SaveLoad.objectIdentifierDict[refID];
-									if(valueType == typeof(GameObject)) {
-										newValue = oi.gameObject;
-									}
-									else {
-										if(oi.GetComponent(valueType.Name) != null) {
-											newValue = oi.GetComponent(valueType);
-										}
-										else {
-											Debug.Log("[LoadGame] " + "oi.GetComponent(" + valueType + ") == null");
-										}
-									}
-								}
-							}
-							else {
-								Dictionary<string,object> valueDict = convDict.values[i.ToString()] as Dictionary<string,object>;
-								SetValues(ref newValue, valueDict);
-							}
+                                if (valueType.Namespace == "System" || surrogateTypes.Contains(valueType.Name))
+                                {
+                                    newValue = convDict.values[i.ToString()];
+                                }
+                                else if (valueType == typeof(GameObject) || inheritsFromComponent_valueType == true)
+                                {
+                                    string refID = convDict.values[i.ToString()].ToString();
+                                    if (SaveLoad.objectIdentifierDict.ContainsKey(refID))
+                                    {
+                                        ObjectIdentifier oi = SaveLoad.objectIdentifierDict[refID];
+                                        if (valueType == typeof(GameObject))
+                                        {
+                                            newValue = oi.gameObject;
+                                        }
+                                        else
+                                        {
+                                            if (oi.GetComponent(valueType.Name) != null)
+                                            {
+                                                newValue = oi.GetComponent(valueType);
+                                            }
+                                            else
+                                            {
+                                                Debug.Log("[LoadGame] " + "oi.GetComponent(" + valueType + ") == null");
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Dictionary<string, object> valueDict = convDict.values[i.ToString()] as Dictionary<string, object>;
+                                    SetValues(ref newValue, valueDict);
+                                }
 
-							dictionaryAddMethod.Invoke(dictionary, new object[] {newKey, newValue} );
-						}
-						valueToSet = dictionary;
-					}
-				}
-				if(refRec.field != null) {
-					refRec.field.SetValue(refRec.baseInstance, valueToSet);
-				}
-				else if(refRec.property != null) {
-					refRec.property.SetValue(refRec.baseInstance, valueToSet, null);
-				}
-			}
-		}
+                                dictionaryAddMethod.Invoke(dictionary, new object[] { newKey, newValue });
+                            }
+                            valueToSet = dictionary;
+                        }
+                    }
+                    if (refRec.field != null)
+                    {
+                        refRec.field.SetValue(refRec.baseInstance, valueToSet);
+                    }
+                    else if (refRec.property != null)
+                    {
+                        refRec.property.SetValue(refRec.baseInstance, valueToSet, null);
+                    }
+                }
+            }
 
-		//This is when you might want to call any functions that should be called when a gameobject is loaded.
-		//Remember that you can access the static SaveLoad.objectIdentifierDict from anywhere to access all the ObjectIdentifiers that were reconstructed after loading the game.
-		if(true) {
-			foreach(KeyValuePair<string,ObjectIdentifier> pair in SaveLoad.objectIdentifierDict) {
-				pair.Value.gameObject.SendMessage("OnLoad",SendMessageOptions.DontRequireReceiver);
-			}
-		}
+            //This is when you might want to call any functions that should be called when a gameobject is loaded.
+            //Remember that you can access the static SaveLoad.objectIdentifierDict from anywhere to access all the ObjectIdentifiers that were reconstructed after loading the game.
+            if (true)
+            {
+                foreach (KeyValuePair<string, ObjectIdentifier> pair in SaveLoad.objectIdentifierDict)
+                {
+                    pair.Value.gameObject.SendMessage("OnLoad", SendMessageOptions.DontRequireReceiver);
+                }
+            }
 
-		if(debugController.gameLoaded) {
-			Debug.Log("Game Loaded: " + loadedGame.savegameName + " (" + loadedGame.saveDate + ").");
-		}
+            if (debugController.gameLoaded)
+            {
+                Debug.Log("Game Loaded: " + loadedGame.savegameName + " (" + loadedGame.saveDate + ").");
+            }
+        }
+        catch
+        {
+            Debug.LogError("Something went wrong with load");
+        }
+      
 	}
 
 	//Clear the scene of all non-persistent GameObjects so we have a clean slate
@@ -996,11 +1067,14 @@ public class SaveLoadUtility : MonoBehaviour {
 		go.tag = sceneObject.tag;
 		go.SetActive (sceneObject.active);
 
+        Debug.Log("go values set to sceneObject values");
 
 		//Go through the stored object's component list and reassign all values in each component
 		foreach(ObjectComponent obc in sceneObject.objectComponents) {
 			UnpackComponent(ref go, obc);
 		}
+
+        Debug.Log("components unpacked");
 
 		ObjectIdentifier oi = go.GetComponent<ObjectIdentifier>();
 		if(oi != null) {
@@ -1009,6 +1083,7 @@ public class SaveLoadUtility : MonoBehaviour {
 
 			//Destroy any children (which have an ObjectIdentifier component) that were not referenced as having a parent
 			ObjectIdentifier[] oi_children = go.GetComponentsInChildren<ObjectIdentifier>();
+            Debug.Log(oi_children.Length + " number of children");
 			foreach(ObjectIdentifier oi_child in oi_children) {
 				if(oi_child.gameObject != go) {
 					if(string.IsNullOrEmpty(oi_child.id) == true) {
@@ -1017,7 +1092,7 @@ public class SaveLoadUtility : MonoBehaviour {
 				}
 			}
 		}
-
+        Debug.Log("Returning gameObject");
 		return go;
 	}
 
@@ -1028,7 +1103,7 @@ public class SaveLoadUtility : MonoBehaviour {
 		if(debugController.unpackComponent) {
 			Debug.Log("[UnpackComponent] " + "Unpacking Component: " + obc.componentName + " on GameObject " + go.name);
 		}
-
+  
 		//add components that are missing
 		if(go.GetComponent(obc.componentName) == null) {
 			Type componentType = Type.GetType(obc.componentName);
@@ -1037,7 +1112,10 @@ public class SaveLoadUtility : MonoBehaviour {
 
 		//Unpack the component
 		object obj = go.GetComponent(obc.componentName) as object;
+        Debug.Log("Component is now an obj");
+
 		SetValues(ref obj, obc.fields);
+        Debug.Log("Finished unpacking component" + obc.componentName);
 	}
 
 	private void SetValues(ref object baseInstance, Dictionary<string,object> baseDict) {
@@ -1049,13 +1127,15 @@ public class SaveLoadUtility : MonoBehaviour {
 		}
 
 		foreach(KeyValuePair<string,object> pair in baseDict) {
-
+            
 			FieldInfo field = baseInstanceType.GetField(pair.Key,BindingFlags.Instance 
 				| BindingFlags.Public 
 				| BindingFlags.NonPublic 
 				| BindingFlags.SetField);
-			if(field != null) {
-				Type fieldType = field.FieldType;
+            
+            if (field != null) {
+                Debug.Log("for " + field.Name);
+                Type fieldType = field.FieldType;
 
 				if(debugController.setValuesField) {
 					Debug.Log("[SetValues] " + baseInstanceType.Name + "/" + field.Name + " (" + fieldType.Name + ")");
@@ -1070,9 +1150,11 @@ public class SaveLoadUtility : MonoBehaviour {
 				*/
 
 				ReadFromDictionary(fieldType, pair.Key, pair.Value, field, null,  baseInstance);
-			}
-			else {							
-				PropertyInfo property = baseInstanceType.GetProperty(pair.Key);
+                Debug.Log("Finished for field " + field.Name);
+            }
+			else {
+                Debug.Log("for null name") ;
+                PropertyInfo property = baseInstanceType.GetProperty(pair.Key);
 				if(property != null) {
 					if(property.CanWrite == true) {
 						Type propertyType = property.PropertyType;
@@ -1251,7 +1333,7 @@ public class SaveLoadUtility : MonoBehaviour {
 					var newElement = Activator.CreateInstance(elementType);
 					array.SetValue(newElement,i);
 				}
-
+             
 				foreach(KeyValuePair<string,object> pair in fieldValueDict) {
 					Dictionary<string,object> elementDict = pair.Value as Dictionary<string, object>;
 					if(elementDict == null) {

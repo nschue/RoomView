@@ -29,7 +29,6 @@ public class CatalogManager : MonoBehaviour {
     [HideInInspector]
     public bool isActive = false;
 
-
     // Use this for initialization
     void Start () {
         titleText = GameObject.Find("Title Text").GetComponent<UnityEngine.UI.Text>();
@@ -45,7 +44,6 @@ public class CatalogManager : MonoBehaviour {
         catalogPreviews = new Sprite[catalogSize];
         catalogStart = 0;
 		
-
 		if (catalogSize > 6)
 			catalogStop = 6;
 		else
@@ -87,8 +85,6 @@ public class CatalogManager : MonoBehaviour {
         Debug.Log("Waiting  to load "+catalogSize + " objects");
         yield return new WaitForSeconds(2.0f);
         
-
-
         for (int i = 0; i < catalogSize; i++)
         {
 
@@ -96,14 +92,12 @@ public class CatalogManager : MonoBehaviour {
             texture = UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
             if(texture == null)
             {
-                Debug.Log("wating");
+                Debug.Log("waiting");
                 yield return new WaitForSeconds(0.1f);
                 i--;
                 continue;
             }
                 
-
-
             //Debug.Log("loading " + i);
             newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             //Debug.Log("loaded " + i);
@@ -125,8 +119,6 @@ public class CatalogManager : MonoBehaviour {
         {
             catOn();
         }
-            
-
     }
 
     //Move all GameObjects to IgnoreRaycast layer
@@ -305,9 +297,6 @@ public class CatalogManager : MonoBehaviour {
 				previews[0].gameObject.SetActive(false);
 				break;
 		}
-
-
-
 	}
 
 	public void catOff() {
@@ -352,7 +341,6 @@ public class CatalogManager : MonoBehaviour {
             Debug.LogWarning("End of catalog reached");
             return;
         }
-
 
         Debug.Log("Scrolling forward");
 
@@ -411,10 +399,6 @@ public class CatalogManager : MonoBehaviour {
 
         ShowObjectPreviews();
     }
-
-
-
-
 
 	public GameObject getGameObjectAtIndex(int indexInCatalog) {
 		if(indexInCatalog >= catalogSize) {

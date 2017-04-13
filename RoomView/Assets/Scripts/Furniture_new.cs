@@ -4,7 +4,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Furniture : MonoBehaviour {
+public class Furniture_new : MonoBehaviour
+{
 
     public SteamVR_TrackedObject controller;
     public GameObject contextMenuPrefab;
@@ -17,11 +18,14 @@ public class Furniture : MonoBehaviour {
     public bool needsPlacement = false;
     public bool placing = false;
 
-    //[DontSaveMember] private Material highlightMaterial;
+    [DontSaveMember]
+    private Material highlightMaterial;
 
-    //[DontSaveMember] private Material[] materialArray;
+    [DontSaveMember]
+    private Material[] materialArray;
 
-    //[DontSaveMember] private Material[] materialArrayWithHighlight;
+    [DontSaveMember]
+    private Material[] materialArrayWithHighlight;
 
     private Vector3 offset;
     private SteamVR_TrackedController controllerInput;
@@ -33,20 +37,18 @@ public class Furniture : MonoBehaviour {
     private float padX;
     private int id;
 
-	//[DontSaveMember]
-	//Material thisShader;
-    
 
 
     // Use this for initialization
-    void Awake() {
-        
+    void Awake()
+    {
+
         //Can't be completed on furniture in the room at start
 
         //controller is empty do this
         /*GameObject controllerObject = GameObject.FindGameObjectWithTag("Right Controller") as GameObject;
         //controller = controllerObject.GetComponent<SteamVR_TrackedObject>();*/
-        
+
 
         if (controller != null)
         {
@@ -66,12 +68,11 @@ public class Furniture : MonoBehaviour {
     {
         contextMenuPrefab = Resources.Load("UI Prefabs/ContextMenu") as GameObject;
         id = GetComponent<ObjectCategory>().objectID;
-        /*
         highlightMaterial = Resources.Load("Materials/HoverHighlight") as Material;
 
         List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
         List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
-        if ( !isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
+        if (!isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
         {
             newMaterials.Add(highlightMaterial);
         }
@@ -82,29 +83,20 @@ public class Furniture : MonoBehaviour {
             pointer.PointerOut += OffHover;
             controllerInput.PadClicked += OnPadClicked;
         }
-        
+
         materialArrayWithHighlight = newMaterials.ToArray();
         materialArray = materials.ToArray();
-        */
-
-        if (isClone)
-        {
-            pointer.PointerIn += OnHover;
-            pointer.PointerOut += OffHover;
-            controllerInput.PadClicked += OnPadClicked;
-			//isClone = false;
-        }
 
         if (controller == null)
             controller = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedObject>();
 
-        if(controllerInput == null)
+        if (controllerInput == null)
         {
             controllerInput = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedController>();
             controllerInput.PadClicked += OnPadClicked;
         }
-            
-        if(pointer == null)
+
+        if (pointer == null)
         {
             pointer = GameObject.Find("Controller (right)").GetComponent<SteamVR_LaserPointer>();
             pointer.PointerIn += OnHover;
@@ -114,10 +106,8 @@ public class Furniture : MonoBehaviour {
         objectIdentifier.id = gameObject.GetComponent<ObjectCategory>().objectID.ToString();
         objectIdentifier.componentSaveMode = ObjectIdentifier.ComponentSaveMode.All;
 
-        GetComponent<MeshRenderer>().sharedMaterial = new Material(GetComponent<MeshRenderer>().sharedMaterial);
-		//thisShader = GetComponent<MeshRenderer>().sharedMaterial;
 
-		UnityEditor.PrefabUtility.DisconnectPrefabInstance(this);
+
     }
 
     private void Update()
@@ -129,7 +119,7 @@ public class Furniture : MonoBehaviour {
             //targetRotation.eulerAngles = new Vector3(transform.eulerAngles.x, targetRotation.eulerAngles.y + rotationDifference.y, transform.eulerAngles.z);
             //transform.rotation = targetRotation;
             float rotationAngle = 60f * Time.deltaTime;
-            if (padX>0)
+            if (padX > 0)
             {
                 Quaternion targetQuat = Quaternion.AngleAxis(rotationAngle, Vector3.up) * transform.rotation;
                 transform.rotation = targetQuat;
@@ -151,8 +141,8 @@ public class Furniture : MonoBehaviour {
 
             CatalogManager manager = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>();
             offset = manager.getObjectByID(id).transform.position;
-        }        
-        
+        }
+
         else if (isMove)//Conext menu button sets isMove
         {
             Ray raycast = new Ray(controller.transform.position, controller.transform.forward); //
@@ -161,7 +151,8 @@ public class Furniture : MonoBehaviour {
             transform.position = hit.point + offset;
         }
 
-        if(needsPlacement && !placing){
+        if (needsPlacement && !placing)
+        {
             placing = true;
             controllerInput.TriggerClicked += CompleteMove;
             offset = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
@@ -176,14 +167,11 @@ public class Furniture : MonoBehaviour {
 
         if (isSelected || isHover)//If hover or selected highlight
         {
-            //gameObject.GetComponent<MeshRenderer>().materials = materialArrayWithHighlight;
-            GetComponent<MeshRenderer>().sharedMaterial.SetColor("_EmissionColor", new Color(0.2f, 0.2f, 0.2f));
+            gameObject.GetComponent<MeshRenderer>().materials = materialArrayWithHighlight;
         }
-            
-        else
-			//gameObject.GetComponent<MeshRenderer>().materials = materialArray;
-			GetComponent<MeshRenderer>().sharedMaterial.SetColor("_EmissionColor", new Color());
 
+        else
+            gameObject.GetComponent<MeshRenderer>().materials = materialArray;
 
     }
 
@@ -211,7 +199,7 @@ public class Furniture : MonoBehaviour {
 
     void OnHover(object sender, PointerEventArgs e)
     {
-        if((e.target == GetComponent<Collider>().transform) && !isSelected && !isFurnitureSelected)
+        if ((e.target == GetComponent<Collider>().transform) && !isSelected && !isFurnitureSelected)
         {
             controllerInput.TriggerClicked += OnSelectButton;
             isHover = true;
@@ -220,7 +208,7 @@ public class Furniture : MonoBehaviour {
 
     void OffHover(object sender, PointerEventArgs e)
     {
-        if(e.target == GetComponent<Collider>().transform)
+        if (e.target == GetComponent<Collider>().transform)
         {
             isHover = false;
             controllerInput.TriggerClicked -= OnSelectButton;
@@ -229,12 +217,12 @@ public class Furniture : MonoBehaviour {
 
     public virtual void OnSelectButton(object sender, ClickedEventArgs e)
     {
-        GameObject contextMenu = Instantiate(contextMenuPrefab)as GameObject;
+        GameObject contextMenu = Instantiate(contextMenuPrefab) as GameObject;
         contextMenu.GetComponent<UI_Follower>().mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         contextMenu.GetComponent<UI_Follower>().setSnappedObject(gameObject);
         isSelected = true;
         isFurnitureSelected = true;
-        
+
     }
     /*
     public void setMaterialArray(Material[] newarray)
@@ -260,5 +248,5 @@ public class Furniture : MonoBehaviour {
         controllerInput.PadClicked -= OnPadClicked;
     }
 
-    
+
 }

@@ -90,6 +90,7 @@
     <Compile Include="Assets\BriansHouse\Source\Scripts\Interactions.cs" />
     <Compile Include="Assets\BriansHouse\Source\Scripts\Pickupable.cs" />
     <Compile Include="Assets\BriansHouse\Source\Scripts\SwitchLight.cs" />
+    <Compile Include="Assets\HighlightMaterial.cs" />
     <Compile Include="Assets\MenuManager.cs" />
     <Compile Include="Assets\Scripts\CatButtonController.cs" />
     <Compile Include="Assets\Scripts\CatalogCanvasFollower.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Assets\Scripts\CustomRoom.cs" />
     <Compile Include="Assets\Scripts\FilterButton.cs" />
     <Compile Include="Assets\Scripts\Furniture.cs" />
+    <Compile Include="Assets\Scripts\Furniture_new.cs" />
     <Compile Include="Assets\Scripts\LevelManager.cs" />
     <Compile Include="Assets\Scripts\LoadButton.cs" />
     <Compile Include="Assets\Scripts\LoadSceneButton.cs" />
@@ -111,6 +113,7 @@
     <Compile Include="Assets\Scripts\RoomOptions.cs" />
     <Compile Include="Assets\Scripts\RoomSelectionMenu.cs" />
     <Compile Include="Assets\Scripts\SaveButton.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad_Custom.cs" />
     <Compile Include="Assets\Scripts\TeleportController.cs" />
     <Compile Include="Assets\Scripts\UI_Follower.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_GazeTracker.cs" />

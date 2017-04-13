@@ -80,8 +80,7 @@ public class ContextMenuButton : MenuButton {
         cloneObject.GetComponent<Furniture>().fromCatalog = false;
         cloneObject.layer = 2;
         cloneObject.GetComponent<Furniture>().isMove = true;
-        cloneObject.GetComponent<Furniture>().materialArray = snappedObject.GetComponent<Furniture>().materialArray;
-        cloneObject.GetComponent<Furniture>().materialArray = snappedObject.GetComponent<Furniture>().materialArray;
+        //cloneObject.GetComponent<Furniture>().materialArray = snappedObject.GetComponent<Furniture>().materialArray;
         Furniture.isFurnitureSelected = true;
     }
 
@@ -127,7 +126,6 @@ public class ContextMenuButton : MenuButton {
 
             case action.rotate:
                 RotateFurniture();
-          
                 break;
 
             case action.clone:
