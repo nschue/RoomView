@@ -23,6 +23,7 @@ public class CatalogManager : MonoBehaviour {
     private UnityEngine.UI.Image[] previews;
 	private UnityEngine.UI.Image[] backs;
 
+	public RoomOptions roomOptions;
 	public Canvas catalogCanvas;
     public SteamVR_TrackedController controllerInput;
 
@@ -110,7 +111,11 @@ public class CatalogManager : MonoBehaviour {
 
     public virtual void displayCatalog(object sender, ClickedEventArgs e)
     {
-        if (isActive)
+		if(roomOptions.optionsDisplaying)
+		{
+			return;
+		}
+        else if(isActive)
         {
             catOff();
         }
