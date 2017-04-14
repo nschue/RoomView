@@ -5,7 +5,7 @@ using System.IO;
 public class CatalogManager : MonoBehaviour
 {
 
-<<<<<<< Updated upstream
+
 	private GameObject[] catalog;
 	private Sprite[] catalogPreviews;
 	private int catalogSize;
@@ -26,10 +26,8 @@ public class CatalogManager : MonoBehaviour
 	private UnityEngine.UI.Image[] backs;
 
 	public RoomOptions roomOptions;
-	public Canvas catalogCanvas;
-=======
+
     public Canvas catalogCanvas;                // the UI holder gameobject
->>>>>>> Stashed changes
     public SteamVR_TrackedController controllerInput;
 
     private string[] catalogNames;            // holds names of all prefabs in the prefabs folder (full path name)
@@ -60,19 +58,6 @@ public class CatalogManager : MonoBehaviour
         titleText.text = "Catalog > Room: All	Category: All";
         //UnityEditor.AssetPreview.SetPreviewTextureCacheSize(100);
 
-<<<<<<< Updated upstream
-    // Use this for initialization
-    void Start () {
-        titleText = GameObject.Find("Title Text").GetComponent<UnityEngine.UI.Text>();
-        titleText.text = "Catalog > Room: All    Category: All";
-        catalog = Resources.LoadAll<GameObject>("Prefabs");
-		catalogSize = catalog.Length;
-        //
-        if (catalogSize > 49)
-            catalogSize = 49;
-
-        //
-=======
         catalogNames = System.IO.Directory.GetFiles("Assets/Resources/Prefabs", "*.prefab");
         catalogSize = catalogNames.Length;
         print(catalogSize);
@@ -82,10 +67,9 @@ public class CatalogManager : MonoBehaviour
 
         StartCoroutine(getObjectCodes());
 
->>>>>>> Stashed changes
+
         indexInFilteredCatalog = new int[catalogSize];
         catalogStart = 0;
-<<<<<<< Updated upstream
 		
 		if (catalogSize > 6)
 			catalogStop = 6;
@@ -109,30 +93,7 @@ public class CatalogManager : MonoBehaviour
 
         StartCoroutine(LoadAllObjectPreviewsCo()); //LoadAllObjectPreviews();
         //ShowObjectPreviews();
-=======
 
-
-        if (catalogSize > 6)
-            catalogStop = 6;
-        else
-            catalogStop = catalogSize;
-
-        previews = new UnityEngine.UI.Image[6];
-        backs = new UnityEngine.UI.Image[6];
-        previews[0] = GameObject.Find("Preview1").GetComponent<UnityEngine.UI.Image>();
-        previews[1] = GameObject.Find("Preview2").GetComponent<UnityEngine.UI.Image>();
-        previews[2] = GameObject.Find("Preview3").GetComponent<UnityEngine.UI.Image>();
-        previews[3] = GameObject.Find("Preview4").GetComponent<UnityEngine.UI.Image>();
-        previews[4] = GameObject.Find("Preview5").GetComponent<UnityEngine.UI.Image>();
-        previews[5] = GameObject.Find("Preview6").GetComponent<UnityEngine.UI.Image>();
-        backs[0] = GameObject.Find("Back1").GetComponent<UnityEngine.UI.Image>();
-        backs[1] = GameObject.Find("Back2").GetComponent<UnityEngine.UI.Image>();
-        backs[2] = GameObject.Find("Back3").GetComponent<UnityEngine.UI.Image>();
-        backs[3] = GameObject.Find("Back4").GetComponent<UnityEngine.UI.Image>();
-        backs[4] = GameObject.Find("Back5").GetComponent<UnityEngine.UI.Image>();
-        backs[5] = GameObject.Find("Back6").GetComponent<UnityEngine.UI.Image>();
-
->>>>>>> Stashed changes
         catalogCanvas.gameObject.SetActive(false);
         controllerInput.MenuButtonClicked += displayCatalog;
     }
@@ -164,11 +125,6 @@ public class CatalogManager : MonoBehaviour
 
         Debug.Log("Waiting for load");
         yield return new WaitForSeconds(2.0f);
-<<<<<<< Updated upstream
-        
-        for (int i = 0; i < catalogSize; i++)
-=======
-
 
         for (int i = catalogStart; i < catalogStop; i++)
         {
@@ -200,7 +156,6 @@ public class CatalogManager : MonoBehaviour
         Sprite newSprite;
 
         for (int i = filtCatalogStart; i < filtCatalogStop; i++)
->>>>>>> Stashed changes
         {
             print(catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25));
             UnityEditor.AssetPreview.GetAssetPreview(Resources.Load<GameObject>("Prefabs/" + catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25)));
@@ -216,20 +171,13 @@ public class CatalogManager : MonoBehaviour
             texture = UnityEditor.AssetPreview.GetAssetPreview(Resources.Load<GameObject>("Prefabs/" + catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25)));
             if(texture == null)
             {
-<<<<<<< Updated upstream
+
                 Debug.Log("waiting");
-=======
->>>>>>> Stashed changes
                 yield return new WaitForSeconds(0.1f);
                 i--;
                 continue;
             }
-<<<<<<< Updated upstream
-                
-            //Debug.Log("loading " + i);
-=======
 
->>>>>>> Stashed changes
             newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             print("working");
             currentCatSprites[i % 6] = newSprite;
@@ -242,18 +190,11 @@ public class CatalogManager : MonoBehaviour
     // Loads the previews into the UI (for filters)
     private void ShowCurrentFilteredPreviews()
     {
-<<<<<<< Updated upstream
 		if(roomOptions.optionsDisplaying)
 		{
 			return;
 		}
         else if(isActive)
-=======
-        int previewsToShow;
-
-        previewsToShow = filtCatalogStop % 6;
-        if (filteredCatalogSize == 0)
->>>>>>> Stashed changes
         {
             toggleCatButtons(-1);
             return;
@@ -261,7 +202,11 @@ public class CatalogManager : MonoBehaviour
         else
             toggleCatButtons(previewsToShow);
 
-        for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
+        int previewsToShow;
+
+        previewsToShow = filtCatalogStop % 6;
+        if (filteredCatalogSize == 0)
+            for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
         {
             previews[i].sprite = currentCatSprites[i];
         }
@@ -406,6 +351,132 @@ public class CatalogManager : MonoBehaviour
         }
     }
 
+    private void toggleCatButtons(int previewsToShow)
+    {
+        switch (previewsToShow)
+        {
+            case -1:
+                backs[0].gameObject.SetActive(false);
+                backs[1].gameObject.SetActive(false);
+                backs[2].gameObject.SetActive(false);
+                backs[3].gameObject.SetActive(false);
+                backs[4].gameObject.SetActive(false);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                previews[1].gameObject.SetActive(false);
+                previews[2].gameObject.SetActive(false);
+                previews[3].gameObject.SetActive(false);
+                previews[4].gameObject.SetActive(false);
+                previews[5].gameObject.SetActive(false);
+                break;
+
+            case 1:
+                backs[0].gameObject.SetActive(true);
+                backs[1].gameObject.SetActive(false);
+                backs[2].gameObject.SetActive(false);
+                backs[3].gameObject.SetActive(false);
+                backs[4].gameObject.SetActive(false);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(true);
+                previews[1].gameObject.SetActive(false);
+                previews[2].gameObject.SetActive(false);
+                previews[3].gameObject.SetActive(false);
+                previews[4].gameObject.SetActive(false);
+                previews[5].gameObject.SetActive(false);
+                break;
+
+            case 2:
+                backs[0].gameObject.SetActive(true);
+                backs[1].gameObject.SetActive(true);
+                backs[2].gameObject.SetActive(false);
+                backs[3].gameObject.SetActive(false);
+                backs[4].gameObject.SetActive(false);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(true);
+                previews[1].gameObject.SetActive(true);
+                previews[2].gameObject.SetActive(false);
+                previews[3].gameObject.SetActive(false);
+                previews[4].gameObject.SetActive(false);
+                previews[5].gameObject.SetActive(false);
+                break;
+
+            case 3:
+                backs[0].gameObject.SetActive(true);
+                backs[1].gameObject.SetActive(true);
+                backs[2].gameObject.SetActive(true);
+                backs[3].gameObject.SetActive(false);
+                backs[4].gameObject.SetActive(false);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(true);
+                previews[1].gameObject.SetActive(true);
+                previews[2].gameObject.SetActive(true);
+                previews[3].gameObject.SetActive(false);
+                previews[4].gameObject.SetActive(false);
+                previews[5].gameObject.SetActive(false);
+                break;
+
+            case 4:
+                backs[0].gameObject.SetActive(true);
+                backs[1].gameObject.SetActive(true);
+                backs[2].gameObject.SetActive(true);
+                backs[3].gameObject.SetActive(true);
+                backs[4].gameObject.SetActive(false);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(true);
+                previews[1].gameObject.SetActive(true);
+                previews[2].gameObject.SetActive(true);
+                previews[3].gameObject.SetActive(true);
+                previews[4].gameObject.SetActive(false);
+                previews[5].gameObject.SetActive(false);
+                break;
+
+            case 5:
+                backs[0].gameObject.SetActive(true);
+                backs[1].gameObject.SetActive(true);
+                backs[2].gameObject.SetActive(true);
+                backs[3].gameObject.SetActive(true);
+                backs[4].gameObject.SetActive(true);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(true);
+                previews[1].gameObject.SetActive(true);
+                previews[2].gameObject.SetActive(true);
+                previews[3].gameObject.SetActive(true);
+                previews[4].gameObject.SetActive(true);
+                previews[5].gameObject.SetActive(false);
+                break;
+
+            case 0:
+                backs[0].gameObject.SetActive(true);
+                backs[1].gameObject.SetActive(true);
+                backs[2].gameObject.SetActive(true);
+                backs[3].gameObject.SetActive(true);
+                backs[4].gameObject.SetActive(true);
+                backs[5].gameObject.SetActive(true);
+                previews[0].gameObject.SetActive(true);
+                previews[1].gameObject.SetActive(true);
+                previews[2].gameObject.SetActive(true);
+                previews[3].gameObject.SetActive(true);
+                previews[4].gameObject.SetActive(true);
+                previews[5].gameObject.SetActive(true);
+                break;
+
+            default:
+                backs[0].gameObject.SetActive(false);
+                backs[1].gameObject.SetActive(false);
+                backs[2].gameObject.SetActive(false);
+                backs[3].gameObject.SetActive(false);
+                backs[4].gameObject.SetActive(false);
+                backs[5].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                previews[0].gameObject.SetActive(false);
+                break;
+        }
+    }
+
     // hides the catalog from view, resets the filter flag and active flag
     public void catOff()
     {
@@ -413,131 +484,6 @@ public class CatalogManager : MonoBehaviour
         catalogCanvas.transform.position = new Vector3(0.0f, -100.0f, 0.0f);
         catalogCanvas.gameObject.SetActive(false);
 
-<<<<<<< Updated upstream
-	private void toggleCatButtons(int previewsToShow) {
-		switch (previewsToShow) {
-			case -1:
-				backs[0].gameObject.SetActive(false);
-				backs[1].gameObject.SetActive(false);
-				backs[2].gameObject.SetActive(false);
-				backs[3].gameObject.SetActive(false);
-				backs[4].gameObject.SetActive(false);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				previews[1].gameObject.SetActive(false);
-				previews[2].gameObject.SetActive(false);
-				previews[3].gameObject.SetActive(false);
-				previews[4].gameObject.SetActive(false);
-				previews[5].gameObject.SetActive(false);
-				break;
-
-			case 1:
-				backs[0].gameObject.SetActive(true);
-				backs[1].gameObject.SetActive(false);
-				backs[2].gameObject.SetActive(false);
-				backs[3].gameObject.SetActive(false);
-				backs[4].gameObject.SetActive(false);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(true);
-				previews[1].gameObject.SetActive(false);
-				previews[2].gameObject.SetActive(false);
-				previews[3].gameObject.SetActive(false);
-				previews[4].gameObject.SetActive(false);
-				previews[5].gameObject.SetActive(false);
-				break;
-
-			case 2:
-				backs[0].gameObject.SetActive(true);
-				backs[1].gameObject.SetActive(true);
-				backs[2].gameObject.SetActive(false);
-				backs[3].gameObject.SetActive(false);
-				backs[4].gameObject.SetActive(false);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(true);
-				previews[1].gameObject.SetActive(true);
-				previews[2].gameObject.SetActive(false);
-				previews[3].gameObject.SetActive(false);
-				previews[4].gameObject.SetActive(false);
-				previews[5].gameObject.SetActive(false);
-				break;
-
-			case 3:
-				backs[0].gameObject.SetActive(true);
-				backs[1].gameObject.SetActive(true);
-				backs[2].gameObject.SetActive(true);
-				backs[3].gameObject.SetActive(false);
-				backs[4].gameObject.SetActive(false);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(true);
-				previews[1].gameObject.SetActive(true);
-				previews[2].gameObject.SetActive(true);
-				previews[3].gameObject.SetActive(false);
-				previews[4].gameObject.SetActive(false);
-				previews[5].gameObject.SetActive(false);
-				break;
-
-			case 4:
-				backs[0].gameObject.SetActive(true);
-				backs[1].gameObject.SetActive(true);
-				backs[2].gameObject.SetActive(true);
-				backs[3].gameObject.SetActive(true);
-				backs[4].gameObject.SetActive(false);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(true);
-				previews[1].gameObject.SetActive(true);
-				previews[2].gameObject.SetActive(true);
-				previews[3].gameObject.SetActive(true);
-				previews[4].gameObject.SetActive(false);
-				previews[5].gameObject.SetActive(false);
-				break;
-
-			case 5:
-				backs[0].gameObject.SetActive(true);
-				backs[1].gameObject.SetActive(true);
-				backs[2].gameObject.SetActive(true);
-				backs[3].gameObject.SetActive(true);
-				backs[4].gameObject.SetActive(true);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(true);
-				previews[1].gameObject.SetActive(true);
-				previews[2].gameObject.SetActive(true);
-				previews[3].gameObject.SetActive(true);
-				previews[4].gameObject.SetActive(true);
-				previews[5].gameObject.SetActive(false);
-				break;
-
-			case 0:
-				backs[0].gameObject.SetActive(true);
-				backs[1].gameObject.SetActive(true);
-				backs[2].gameObject.SetActive(true);
-				backs[3].gameObject.SetActive(true);
-				backs[4].gameObject.SetActive(true);
-				backs[5].gameObject.SetActive(true);
-				previews[0].gameObject.SetActive(true);
-				previews[1].gameObject.SetActive(true);
-				previews[2].gameObject.SetActive(true);
-				previews[3].gameObject.SetActive(true);
-				previews[4].gameObject.SetActive(true);
-				previews[5].gameObject.SetActive(true);
-				break;
-
-			default:
-				backs[0].gameObject.SetActive(false);
-				backs[1].gameObject.SetActive(false);
-				backs[2].gameObject.SetActive(false);
-				backs[3].gameObject.SetActive(false);
-				backs[4].gameObject.SetActive(false);
-				backs[5].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				previews[0].gameObject.SetActive(false);
-				break;
-		}
-	}
-=======
         catalogStart = 0;
         if (catalogSize > 6)
             catalogStop = 6;
@@ -551,7 +497,6 @@ public class CatalogManager : MonoBehaviour
         raycastHitOtherObjects();
 
     }
->>>>>>> Stashed changes
 
     // shows the catalog, resets filter codes, title text, and active flags
     public void catOn()
@@ -655,7 +600,7 @@ public class CatalogManager : MonoBehaviour
         //ShowObjectPreviews();
     }
 
-<<<<<<< Updated upstream
+
 	public GameObject getGameObjectAtIndex(int indexInCatalog) {
 		if(indexInCatalog >= catalogSize) {
 			Debug.LogWarning("Index is larger than catalog size. Returning null");
@@ -688,12 +633,11 @@ public class CatalogManager : MonoBehaviour
 		Debug.LogWarning("Object ID not found");
 	}
 
-    public GameObject getObjectByID(int objectID)
-=======
+
+
 
     // spawns objects by button ID (object spawned corresponds to object in the button's preview)
     public void spawnByCatalogButton(int buttonID, Vector3 location)
->>>>>>> Stashed changes
     {
         if (buttonID < 1 || buttonID > 6)
         {
