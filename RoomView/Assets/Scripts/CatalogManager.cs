@@ -26,8 +26,7 @@ public class CatalogManager : MonoBehaviour
 	private UnityEngine.UI.Image[] backs;
 
 	public RoomOptions roomOptions;
-
-    public Canvas catalogCanvas;                // the UI holder gameobject
+	public Canvas catalogCanvas;
     public SteamVR_TrackedController controllerInput;
 
     private string[] catalogNames;            // holds names of all prefabs in the prefabs folder (full path name)
@@ -351,131 +350,7 @@ public class CatalogManager : MonoBehaviour
         }
     }
 
-    private void toggleCatButtons(int previewsToShow)
-    {
-        switch (previewsToShow)
-        {
-            case -1:
-                backs[0].gameObject.SetActive(false);
-                backs[1].gameObject.SetActive(false);
-                backs[2].gameObject.SetActive(false);
-                backs[3].gameObject.SetActive(false);
-                backs[4].gameObject.SetActive(false);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                previews[1].gameObject.SetActive(false);
-                previews[2].gameObject.SetActive(false);
-                previews[3].gameObject.SetActive(false);
-                previews[4].gameObject.SetActive(false);
-                previews[5].gameObject.SetActive(false);
-                break;
-
-            case 1:
-                backs[0].gameObject.SetActive(true);
-                backs[1].gameObject.SetActive(false);
-                backs[2].gameObject.SetActive(false);
-                backs[3].gameObject.SetActive(false);
-                backs[4].gameObject.SetActive(false);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(true);
-                previews[1].gameObject.SetActive(false);
-                previews[2].gameObject.SetActive(false);
-                previews[3].gameObject.SetActive(false);
-                previews[4].gameObject.SetActive(false);
-                previews[5].gameObject.SetActive(false);
-                break;
-
-            case 2:
-                backs[0].gameObject.SetActive(true);
-                backs[1].gameObject.SetActive(true);
-                backs[2].gameObject.SetActive(false);
-                backs[3].gameObject.SetActive(false);
-                backs[4].gameObject.SetActive(false);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(true);
-                previews[1].gameObject.SetActive(true);
-                previews[2].gameObject.SetActive(false);
-                previews[3].gameObject.SetActive(false);
-                previews[4].gameObject.SetActive(false);
-                previews[5].gameObject.SetActive(false);
-                break;
-
-            case 3:
-                backs[0].gameObject.SetActive(true);
-                backs[1].gameObject.SetActive(true);
-                backs[2].gameObject.SetActive(true);
-                backs[3].gameObject.SetActive(false);
-                backs[4].gameObject.SetActive(false);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(true);
-                previews[1].gameObject.SetActive(true);
-                previews[2].gameObject.SetActive(true);
-                previews[3].gameObject.SetActive(false);
-                previews[4].gameObject.SetActive(false);
-                previews[5].gameObject.SetActive(false);
-                break;
-
-            case 4:
-                backs[0].gameObject.SetActive(true);
-                backs[1].gameObject.SetActive(true);
-                backs[2].gameObject.SetActive(true);
-                backs[3].gameObject.SetActive(true);
-                backs[4].gameObject.SetActive(false);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(true);
-                previews[1].gameObject.SetActive(true);
-                previews[2].gameObject.SetActive(true);
-                previews[3].gameObject.SetActive(true);
-                previews[4].gameObject.SetActive(false);
-                previews[5].gameObject.SetActive(false);
-                break;
-
-            case 5:
-                backs[0].gameObject.SetActive(true);
-                backs[1].gameObject.SetActive(true);
-                backs[2].gameObject.SetActive(true);
-                backs[3].gameObject.SetActive(true);
-                backs[4].gameObject.SetActive(true);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(true);
-                previews[1].gameObject.SetActive(true);
-                previews[2].gameObject.SetActive(true);
-                previews[3].gameObject.SetActive(true);
-                previews[4].gameObject.SetActive(true);
-                previews[5].gameObject.SetActive(false);
-                break;
-
-            case 0:
-                backs[0].gameObject.SetActive(true);
-                backs[1].gameObject.SetActive(true);
-                backs[2].gameObject.SetActive(true);
-                backs[3].gameObject.SetActive(true);
-                backs[4].gameObject.SetActive(true);
-                backs[5].gameObject.SetActive(true);
-                previews[0].gameObject.SetActive(true);
-                previews[1].gameObject.SetActive(true);
-                previews[2].gameObject.SetActive(true);
-                previews[3].gameObject.SetActive(true);
-                previews[4].gameObject.SetActive(true);
-                previews[5].gameObject.SetActive(true);
-                break;
-
-            default:
-                backs[0].gameObject.SetActive(false);
-                backs[1].gameObject.SetActive(false);
-                backs[2].gameObject.SetActive(false);
-                backs[3].gameObject.SetActive(false);
-                backs[4].gameObject.SetActive(false);
-                backs[5].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                previews[0].gameObject.SetActive(false);
-                break;
-        }
-    }
+    
 
     // hides the catalog from view, resets the filter flag and active flag
     public void catOff()
