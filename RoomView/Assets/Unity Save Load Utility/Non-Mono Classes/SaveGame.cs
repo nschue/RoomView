@@ -14,7 +14,10 @@ public class SaveGame {
 	}
 
 	public SaveGame(string s, string d, List<SceneObject> list) {
-		savegameName = s;
+
+      
+        savegameName = s;
+
 		saveDate = d;
 		sceneObjects = list;
 	}

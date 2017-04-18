@@ -27,6 +27,7 @@ public class PButton : MenuButton
         switch (selectedAction)
         {
             case action.reset:
+                Debug.Log("Cleared the scene");
                 levelManager.GetComponent<LevelManager>().ResetLevel();
                 break;
 

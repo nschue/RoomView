@@ -47,6 +47,15 @@ public class LoadButton : MenuButton
 
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {
-        slu.LoadGame(gameObject.GetComponent<Text>().text);
-    }
+		//slu.LoadGame(gameObject.GetComponent<Text>().text);
+		StopAllCoroutines();
+		StartCoroutine(loadGame());
+	}
+
+	private IEnumerator loadGame()
+	{
+		Debug.Log("Custom SaveEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+		new SaveLoad_Custom().LoadData(this.GetComponent<Text>().text);
+		yield return null;
+	}
 }
