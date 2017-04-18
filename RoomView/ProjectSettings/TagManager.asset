@@ -16,7 +16,6 @@ TagManager:
   - Pause Menu
   - Save Menu
   - Load Menu
-  - Furniture
   layers:
   - Default
   - TransparentFX

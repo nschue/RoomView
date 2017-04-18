@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -46,16 +45,6 @@ public class SaveButton : MenuButton {
 
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {
-		StopAllCoroutines();
-		StartCoroutine(saveGame());
-        //slu.SaveGame(gameObject.GetComponent<Text>().text);
-		
+        slu.SaveGame(gameObject.GetComponent<Text>().text);
     }
-
-	private IEnumerator saveGame()
-	{
-		Debug.Log("Custom SaveEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-		new SaveLoad_Custom().SaveData(this.GetComponent<Text>().text);
-		yield return null;
-	}
 }

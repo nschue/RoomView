@@ -7,14 +7,11 @@ public class RoomOptions : MonoBehaviour {
 
     
     public SteamVR_TrackedController controllerInput;
-	public CatalogManager prefabCatalog;
+    private SteamVR_LaserPointer pointer;
 
-	[HideInInspector]
-	public bool optionsDisplaying = false;
-
-
-	private SteamVR_LaserPointer pointer;
     private GameObject menuManager;
+	[HideInInspector]
+    public bool optionsDisplaying = false;
     private bool isSelected = false;
     private bool buttonSelected = false;
     private bool catManIsActive;
@@ -27,7 +24,11 @@ public class RoomOptions : MonoBehaviour {
 
     void Start()
     {
-      
+        menuManager = GameObject.Find("MenuManager");
+        if(menuManager == null)
+        {
+            Debug.LogError("menuManager not found");
+        }
     }
 
     public virtual void displayInRoomMenu(object sender, ClickedEventArgs e)
@@ -57,20 +58,16 @@ public class RoomOptions : MonoBehaviour {
 
     }
     public void optionsOn()
-    {
-		if (prefabCatalog.isActive)
-		{
-			prefabCatalog.catOff();
-			catManIsActive = true;
-		}
+    {      
+        gameObject.SetActive(true);
 
-		else
-		{
-			catManIsActive = false;
-		}
-		gameObject.SetActive(true);
-
-        
+        //catManIsActive = menuManager.GetComponent<MenuManager>().catalogActive; //Get current state of catalogManager
+        //Working on making a MenuManager to store all of the current states of our menus, trying close all menus when the pause menu is opened. 
+        //When the pause menu is closed, reopen whatever menus were open again.
+        //if (catManIsActive)
+        //{
+        //    menuManager.GetComponent<CatalogManager>().catOff();//If active, turn it off
+        //}
         transform.position = Camera.main.transform.position + Camera.main.transform.forward * 6.0f;
       
         optionsDisplaying = true;
@@ -85,7 +82,7 @@ public class RoomOptions : MonoBehaviour {
 
         if (catManIsActive)
         {
-			prefabCatalog.catOn();
+            //prefabCatalog.GetComponent<CatalogManager>().catOn();//If it was active, turn it back on
         }
     }
 
@@ -125,15 +122,12 @@ public class RoomOptions : MonoBehaviour {
             parentObject = parentTransform.gameObject;
             if (parentObject != gameObject)
             {
-				if (parentObject.GetComponent<Furniture>() != null && parentObject.GetComponent<Furniture>().isMove)
-				{
-					gObject.layer = 2;
-				}
-
-				else
-				{
-					gObject.layer = 0;
-				}
+                if (parentObject.GetComponent<Furniture>() != null && parentObject.GetComponent<Furniture>().isMove)
+                {
+                    gObject.layer = 2;
+                }
+                else
+                    gObject.layer = 0;
             }
         }
     }

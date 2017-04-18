@@ -1,50 +1,58 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 
-public class CatalogManager : MonoBehaviour {
-
-	private GameObject[] catalog;
-	private Sprite[] catalogPreviews;
-	private int catalogSize;
-	private int catalogStart;
-	private int catalogStop;
-	
-    //
-    private int[] indexInFilteredCatalog;
-    private int filteredCatalogSize;
-    private int filtCatalogStart;
-    private int filtCatalogStop;
-    private bool filterActive = false;
-    private UnityEngine.UI.Text titleText;
-    private ObjectCategory.ROOMCODE filtRoomCode = ObjectCategory.ROOMCODE.ALL;
-    private ObjectCategory.OBJECTTYPE filtTypeCode = ObjectCategory.OBJECTTYPE.ALL;
-    //
-    private UnityEngine.UI.Image[] previews;
-	private UnityEngine.UI.Image[] backs;
-
-	public RoomOptions roomOptions;
+public class CatalogManager : MonoBehaviour
+{
 	public Canvas catalogCanvas;
-    public SteamVR_TrackedController controllerInput;
+	public SteamVR_TrackedController controllerInput;
+	public RoomOptions roomOptions;
 
-    [HideInInspector]
-    public bool isActive = false;
+	[HideInInspector]
+	public bool isActive = false;            // flag to show if UI is on screen
 
-    // Use this for initialization
-    void Start () {
-        titleText = GameObject.Find("Title Text").GetComponent<UnityEngine.UI.Text>();
-        titleText.text = "Catalog > Room: All    Category: All";
-        catalog = Resources.LoadAll<GameObject>("Prefabs");
-		catalogSize = catalog.Length;
-        //
-        if (catalogSize > 49)
-            catalogSize = 49;
+	private string[] catalogNames;            // holds names of all prefabs in the prefabs folder (full path name)
+	private Sprite[] currentCatSprites;      // currently loaded sprites (up to six)
+	private ObjectCategory[] categories;        // holds filter codes for all prefabs
+	private int catalogSize;                    // size of prefab array (objects)
+	private int catalogStart;                  // start index
+	private int catalogStop;                    // stop index
 
-        //
-        indexInFilteredCatalog = new int[catalogSize];
-        catalogPreviews = new Sprite[catalogSize];
-        catalogStart = 0;
-		
+	private UnityEngine.UI.Image[] previews;    // placeholder gameobjects for the prefab previews
+	private UnityEngine.UI.Image[] backs;      // placeholder gameobjects for the prefab preview buttons
+
+	private ObjectCategory.ROOMCODE filtRoomCode = ObjectCategory.ROOMCODE.ALL;      // filter code: room type
+	private ObjectCategory.OBJECTTYPE filtTypeCode = ObjectCategory.OBJECTTYPE.ALL;  // filter code: object type
+	private int[] indexInFilteredCatalog;      // array to store indexes of gameobjects in "catalog names" that match the current filters
+	private int filteredCatalogSize;            // size of the filtered index array
+	private int filtCatalogStart;              // start index of the filtered index array
+	private int filtCatalogStop;                // stop index of the filtered index array
+	private bool filterActive = false;        // flag for filter
+	private UnityEngine.UI.Text titleText;    // placeholder for UI title text
+
+
+
+
+	// initialization
+	public void Start()
+	{
+		titleText = GameObject.Find("Title Text").GetComponent<UnityEngine.UI.Text>();
+		titleText.text = "Catalog > Room: All	Category: All";
+		//UnityEditor.AssetPreview.SetPreviewTextureCacheSize(100);
+
+		catalogNames = System.IO.Directory.GetFiles("Assets/Resources/Prefabs", "*.prefab");
+		catalogSize = catalogNames.Length;
+		print(catalogSize);
+		currentCatSprites = new Sprite[6];
+		categories = new ObjectCategory[catalogSize];
+		categories = new ObjectCategory[catalogSize];
+
+		StartCoroutine(getObjectCodes());
+
+
+		indexInFilteredCatalog = new int[catalogSize];
+		catalogStart = 0;
+
 		if (catalogSize > 6)
 			catalogStop = 6;
 		else
@@ -65,123 +73,145 @@ public class CatalogManager : MonoBehaviour {
 		backs[4] = GameObject.Find("Back5").GetComponent<UnityEngine.UI.Image>();
 		backs[5] = GameObject.Find("Back6").GetComponent<UnityEngine.UI.Image>();
 
-        StartCoroutine(LoadAllObjectPreviewsCo()); //LoadAllObjectPreviews();
-        //ShowObjectPreviews();
-        catalogCanvas.gameObject.SetActive(false);
-        Debug.Log("input");
-        controllerInput.MenuButtonClicked += displayCatalog;
-    }
+		StartCoroutine(LoadObjectPreviewsCo()); //LoadAllObjectPreviews();
+												//ShowObjectPreviews();
 
-    IEnumerator LoadAllObjectPreviewsCo()
-    {
-        //catalogPreviews = new Sprite[catalogSize];
-        Texture2D texture;
-        Sprite newSprite;
+		catalogCanvas.gameObject.SetActive(false);
+		controllerInput.MenuButtonClicked += displayCatalog;
+	}
 
-        for (int i = 0; i < catalogSize; i++)
-        {
-            UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
-        }
+	// Populates the categories array with each object's filter codes
+	IEnumerator getObjectCodes()
+	{
+		for (int i = 0; i < catalogSize; i++)
+			categories[i] = Resources.Load<ObjectCategory>("Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
 
-        Debug.Log("Waiting  to load "+catalogSize + " objects");
-        yield return new WaitForSeconds(2.0f);
-        
-        for (int i = 0; i < catalogSize; i++)
-        {
+		yield return null;
+	}
 
-            texture = null;
-            texture = UnityEditor.AssetPreview.GetAssetPreview(catalog[i]);
-            if(texture == null)
-            {
-                Debug.Log("waiting");
-                yield return new WaitForSeconds(0.1f);
-                i--;
-                continue;
-            }
-                
-            //Debug.Log("loading " + i);
-            newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-            //Debug.Log("loaded " + i);
-            catalogPreviews[i] = newSprite;
-        }
+	// Loads up to 6 previews into memory to be displayed
+	// uses the start/stop variables to decide which previews to load
+	IEnumerator LoadObjectPreviewsCo()
+	{
+		Texture2D texture;
+		Sprite newSprite;
+		GameObject[] frigThisArray = new GameObject[6];
 
-        ShowObjectPreviews();
-        yield return null;
-    }
+		for (int i = catalogStart; i < catalogStop; i++)
+		{
+			print(catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
+			frigThisArray[i % 6] = Resources.Load<GameObject>("Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
+			UnityEditor.AssetPreview.GetAssetPreview(frigThisArray[i % 6]);
 
-    public virtual void displayCatalog(object sender, ClickedEventArgs e)
-    {
-		if(roomOptions.optionsDisplaying)
+		}
+
+		Debug.Log("Waiting for load");
+		yield return new WaitForSeconds(2.0f);
+
+		for (int i = catalogStart; i < catalogStop; i++)
+		{
+			texture = null;
+			texture = UnityEditor.AssetPreview.GetAssetPreview(frigThisArray[i % 6]);
+			//Instantiate(frigThisArray[i%6]);
+			if (texture == null)
+			{
+				Debug.Log("Loading object: " + "Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
+				yield return new WaitForSeconds(0.5f);
+				i--;
+				continue;
+			}
+			newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+			currentCatSprites[i % 6] = newSprite;
+			//Instantiate(Resources.Load<GameObject>("Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25)));
+		}
+
+		ShowCurrentObjectPreviews();
+		Debug.Log("Done Loading");
+		yield return null;
+	}
+
+	// Loads up to 6 previews into memory to be displayed
+	// uses the filter start/stop variables to decide which previews to load
+	IEnumerator LoadFilteredObjectPreviewsCo()
+	{
+		Texture2D texture;
+		Sprite newSprite;
+
+		for (int i = filtCatalogStart; i < filtCatalogStop; i++)
+		{
+			print(catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25));
+			UnityEditor.AssetPreview.GetAssetPreview(Resources.Load<GameObject>("Prefabs/" + catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25)));
+		}
+
+		Debug.Log("Waiting for load");
+		yield return new WaitForSeconds(0.5f);
+		Debug.Log("Done Loading");
+
+		for (int i = filtCatalogStart; i < filtCatalogStop; i++)
+		{
+			texture = null;
+			texture = UnityEditor.AssetPreview.GetAssetPreview(Resources.Load<GameObject>("Prefabs/" + catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25)));
+			if (texture == null)
+			{
+
+				Debug.Log("waiting");
+				yield return new WaitForSeconds(0.1f);
+				i--;
+				continue;
+			}
+
+			newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+			print("working");
+			currentCatSprites[i % 6] = newSprite;
+		}
+
+		ShowCurrentFilteredPreviews();
+		yield return null;
+	}
+
+	// Loads the previews into the UI (for filters)
+	private void ShowCurrentFilteredPreviews()
+	{
+		int previewsToShow;
+		previewsToShow = filtCatalogStop % 6;
+
+		if (roomOptions.optionsDisplaying)
 		{
 			return;
 		}
-        else if(isActive)
-        {
-            catOff();
-        }
+		else if (isActive)
+		{
+			toggleCatButtons(-1);
+			return;
+		}
+		else
+			toggleCatButtons(previewsToShow);
 
-        else
-        {
-            catOn();
-        }
-    }
 
-    //Move all GameObjects to IgnoreRaycast layer
-    private void raycastIgnoreOtherObjects()
-    {
-        GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
-        foreach(GameObject gObject in sceneObjects)
-        {
-            GameObject parentObject;
-            Transform parentTransform = gObject.transform;
-            while (parentTransform.parent != null)
-            {
-                parentTransform = parentTransform.parent;
-            }
-            parentObject = parentTransform.gameObject;
-            if (parentObject != catalogCanvas.gameObject)
-            {
-                gObject.layer = 2;
-            }
-        }
-    }
+		if (filteredCatalogSize == 0)
+			for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
+			{
+				previews[i].sprite = currentCatSprites[i];
+			}
+	}
 
-    //Move all GameObjects back to default layer
-    private void raycastHitOtherObjects()
-    {
-        GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
-        foreach (GameObject gObject in sceneObjects)
-        {
-            GameObject parentObject;
-            Transform parentTransform = gObject.transform;
-            while(parentTransform.parent != null)
-            {
-                parentTransform = parentTransform.parent;
-            }
-            parentObject = parentTransform.gameObject;
-            if (parentObject != catalogCanvas)
-            {
-                if(parentObject.GetComponent<Furniture>() != null && parentObject.GetComponent<Furniture>().isMove)
-                {
-                    gObject.layer = 2;
-                }
-                else
-                    gObject.layer = 0;
-            }
-        }
-    }
-
-	private void ShowObjectPreviews() {
+	// Loads the previews into the UI (for non-filters)
+	private void ShowCurrentObjectPreviews()
+	{
 		int previewsToShow = catalogStop % 6;
 		toggleCatButtons(previewsToShow);
 
-		for(int i = 0, showing = catalogStart ; showing < catalogStop; i++, showing++) {
-			previews[i].sprite = catalogPreviews[showing];
+		for (int i = 0, showing = catalogStart; showing < catalogStop; i++, showing++)
+		{
+			previews[i].sprite = currentCatSprites[i];
 		}
 	}
 
-	private void toggleCatButtons(int previewsToShow) {
-		switch (previewsToShow) {
+	// shows/hides the catalog buttons depending on available objects
+	private void toggleCatButtons(int previewsToShow)
+	{
+		switch (previewsToShow)
+		{
 			case -1:
 				backs[0].gameObject.SetActive(false);
 				backs[1].gameObject.SetActive(false);
@@ -304,7 +334,11 @@ public class CatalogManager : MonoBehaviour {
 		}
 	}
 
-	public void catOff() {
+
+
+	// hides the catalog from view, resets the filter flag and active flag
+	public void catOff()
+	{
 		Debug.Log("Catalog off");
 		catalogCanvas.transform.position = new Vector3(0.0f, -100.0f, 0.0f);
 		catalogCanvas.gameObject.SetActive(false);
@@ -314,98 +348,410 @@ public class CatalogManager : MonoBehaviour {
 			catalogStop = 6;
 		else
 			catalogStop = catalogSize;
-		ShowObjectPreviews();
+
+		//ShowObjectPreviews();
+		filterActive = false;
 
 		isActive = false;
-        raycastHitOtherObjects();
-    }
+		raycastHitOtherObjects();
 
-	public void catOn() {
+	}
+
+	// shows the catalog, resets filter codes, title text, and active flags
+	public void catOn()
+	{
+		StartCoroutine(LoadObjectPreviewsCo());
+
+		filtRoomCode = ObjectCategory.ROOMCODE.ALL;
+		filtTypeCode = ObjectCategory.OBJECTTYPE.ALL;
+		titleText.text = "Catalog > Room: " + filtRoomCode + "	Category: " + filtTypeCode;
+
 		Debug.Log("Catalog on");
 		catalogCanvas.gameObject.SetActive(true);
-		catalogCanvas.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 3.0f;
+		catalogCanvas.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 5.0f;
 
 		isActive = true;
-        raycastIgnoreOtherObjects();
-    }
 
-	public void scrollForward() {
-        // check need to scroll
-        if (!isActive)
-        {
-            Debug.LogWarning("Catalog off. Cannot Scroll");
-            return;
-        }
-        else if (filterActive)
-        {
-            filtScrollForward();
-            return;
-        }
-        else if (catalogStop == catalogSize)
-        {
-            Debug.LogWarning("End of catalog reached");
-            return;
-        }
+		raycastIgnoreOtherObjects();
+	}
 
-        Debug.Log("Scrolling forward");
+	// scrolls UI list to show next available objects (stops if none available)
+	public void scrollForward()
+	{
+		// check meed to scroll
+		if (!isActive)
+		{
+			Debug.LogWarning("Catalog off. Cannot Scroll");
+			return;
+		}
+		else if (filterActive)
+		{
+			filtScrollForward();
+			return;
+		}
+		else if (catalogStop == catalogSize)
+		{
 
-        // remove buttons from view
-        toggleCatButtons(-1);
+			Debug.LogWarning("End of catalog reached");
+			return;
+		}
+
+		Debug.Log("Scrolling forward");
+
+		// remove buttons from view
+		toggleCatButtons(-1);
 
 
-        if (catalogStop + 6 < catalogSize)
-        {
-            catalogStart = catalogStop;
-            catalogStop += 6;
-        }
-        else
-        {
-            catalogStart = catalogStop;
-            catalogStop = catalogSize;
-        }
+		if (catalogStop + 6 < catalogSize)
+		{
+			catalogStart = catalogStop;
+			catalogStop += 6;
+		}
+		else
+		{
+			catalogStart = catalogStop;
+			catalogStop = catalogSize;
+		}
 
-        ShowObjectPreviews();
-    }
+		StopAllCoroutines();
+		StartCoroutine(LoadObjectPreviewsCo());
+		//ShowObjectPreviews();
+	}
 
-	public void scrollBackward() {
-        // check need to scroll
-        if (!isActive)
-        {
-            Debug.LogWarning("Catalog off. Cannot Scroll");
-            return;
-        }
-        else if (filterActive)
-        {
-            filtScrollBackward();
-            return;
-        }
-        else if (catalogStart == 0)
-        {
-            Debug.LogWarning("Start of catalog reached");
-            return;
-        }
+	// scrolls UI list to show previous objects (stops if at the start of list)
+	public void scrollBackward()
+	{
+		// check meed to scroll
+		if (!isActive)
+		{
+			Debug.LogWarning("Catalog off. Cannot Scroll");
+			return;
+		}
+		else if (filterActive)
+		{
+			filtScrollBackward();
+			return;
+		}
+		else if (catalogStart == 0)
+		{
+			Debug.LogWarning("Start of catalog reached");
+			return;
+		}
 
-        Debug.Log("Scrolling back");
+		Debug.Log("Scrolling back");
 
-        // remove buttons from view
-        toggleCatButtons(-1);
+		// remove buttons from view
+		toggleCatButtons(-1);
 
-        if (catalogStart - 6 < 0)
-        {
-            catalogStop = catalogStart;
-            catalogStart = 0;
-        }
-        else
-        {
+		if (catalogStart - 6 < 0)
+		{
+			catalogStop = catalogStart;
+			catalogStart = 0;
+		}
+		else
+		{
+			catalogStop = catalogStart;
+			catalogStart = catalogStart - 6;
+		}
 
-            catalogStop = catalogStart;
-            catalogStart = catalogStart - 6;
-        }
+		StopAllCoroutines();
+		StartCoroutine(LoadObjectPreviewsCo());
+		//ShowObjectPreviews();
+	}
 
-        ShowObjectPreviews();
-    }
 
-	public GameObject getGameObjectAtIndex(int indexInCatalog) {
+
+
+	// spawns objects by button ID (object spawned corresponds to object in the button's preview)
+	public void spawnByCatalogButton(int buttonID, Vector3 location)
+	{
+		if (buttonID < 1 || buttonID > 6)
+		{
+			Debug.LogWarning("Button index out of range");
+			return;
+		}
+
+		GameObject toSpawn;
+		int index;
+		if (!filterActive)
+		{
+			index = (buttonID - 1) + catalogStart;
+
+			toSpawn = Resources.Load<GameObject>("Prefabs/" + catalogNames[index].Substring(25, catalogNames[index].Length - 7 - 25));
+			GameObject furniture = Instantiate(toSpawn, location, toSpawn.transform.rotation);
+			furniture.gameObject.layer = 2;
+			furniture.GetComponent<Furniture>().isMove = true;
+
+			//Instantiate(catalog[index], location, catalog[index].transform.rotation);
+		}
+		else
+		{
+			index = (buttonID - 1) + filtCatalogStart;
+			toSpawn = Resources.Load<GameObject>("Prefabs/" + catalogNames[indexInFilteredCatalog[index]].Substring(25, catalogNames[indexInFilteredCatalog[index]].Length - 7 - 25));
+			GameObject furniture = Instantiate(toSpawn, location, toSpawn.transform.rotation);
+			furniture.gameObject.layer = 2;
+			furniture.GetComponent<Furniture>().isMove = true;
+			//Instantiate(catalog[indexInFilteredCatalog[index]], location, catalog[index].transform.rotation);
+		}
+
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// code for filters
+	//////////////////////////////////////////////////////////////////////////////////////////////
+
+	// sets the room type filter
+	public ObjectCategory.ROOMCODE FiltRoomCode
+	{
+		get
+		{
+			return filtRoomCode;
+		}
+
+		set
+		{
+			filtRoomCode = value;
+			//print("Room Filter: " + filtRoomCode);
+			getFilteredObjects();
+			//print("Room Filter: " + filtRoomCode);
+			titleText.text = "Catalog > Room: " + filtRoomCode + "	Category: " + filtTypeCode;
+		}
+	}
+
+	// sets the object type filter
+	public ObjectCategory.OBJECTTYPE FiltTypeCode
+	{
+		get
+		{
+			return filtTypeCode;
+		}
+
+		set
+		{
+			filtTypeCode = value;
+			//print("Type Filter: " + filtTypeCode);
+			getFilteredObjects();
+			titleText.text = "Catalog > Room: " + filtRoomCode + "	Category: " + filtTypeCode;
+		}
+	}
+
+	// retrieves the index of all objects that match current filters and stores them in "indexInFilteredCatalog[]"
+	// sets the filtered catalog size, start, stop, and filter flag
+	private void getFilteredObjects()
+	{
+		filteredCatalogSize = 0;
+		filtCatalogStart = 0;
+		filtCatalogStop = 0;
+
+		if (filtRoomCode == ObjectCategory.ROOMCODE.ALL && filtTypeCode == ObjectCategory.OBJECTTYPE.ALL)
+		{
+			filterActive = false;
+			catalogStart = 0;
+			if (catalogSize > 6)
+				catalogStop = 6;
+			else
+				catalogStop = catalogSize;
+
+			//ShowObjectPreviews();
+			StopAllCoroutines();
+			StartCoroutine(LoadObjectPreviewsCo());
+			return;
+		}
+		else if (!(filtRoomCode == ObjectCategory.ROOMCODE.ALL) && !(filtTypeCode == ObjectCategory.OBJECTTYPE.ALL))
+		{
+			for (int i = 0; i < catalogSize; i++)
+			{
+				if (categories[i].roomType == filtRoomCode && (categories[i].objectType == filtTypeCode))
+				{
+					indexInFilteredCatalog[filteredCatalogSize] = i;
+					filteredCatalogSize++;
+				}
+			}
+		}
+		else if (!(filtRoomCode == ObjectCategory.ROOMCODE.ALL) && (filtTypeCode == ObjectCategory.OBJECTTYPE.ALL))
+		{
+			for (int i = 0; i < catalogSize; i++)
+			{
+				if ((categories[i].roomType == filtRoomCode))
+				{
+					indexInFilteredCatalog[filteredCatalogSize] = i;
+					filteredCatalogSize++;
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < catalogSize; i++)
+			{
+				if ((categories[i].objectType == filtTypeCode))
+				{
+					indexInFilteredCatalog[filteredCatalogSize] = i;
+					filteredCatalogSize++;
+				}
+			}
+		}
+
+		filterActive = true;
+
+		filtCatalogStart = 0;
+		if (filteredCatalogSize > 6)
+			filtCatalogStop = 6;
+		else
+			filtCatalogStop = filteredCatalogSize;
+
+		//ShowFilteredPreviews();
+		StopAllCoroutines();
+		StartCoroutine(LoadFilteredObjectPreviewsCo());
+	}
+
+	// scrolls UI list to show next available objects (for filters)
+	public void filtScrollForward()
+	{
+		// check meed to scroll
+		if (!isActive)
+		{
+			Debug.LogWarning("Catalog off. Cannot Scroll");
+			return;
+		}
+		else if (filtCatalogStop == filteredCatalogSize)
+		{
+			Debug.LogWarning("End of catalog reached");
+			return;
+		}
+
+		Debug.Log("Scrolling forward");
+
+		// remove buttons from view
+		toggleCatButtons(-1);
+
+
+		if (filtCatalogStop + 6 < filteredCatalogSize)
+		{
+			filtCatalogStart = filtCatalogStop;
+			catalogStop += 6;
+		}
+		else
+		{
+			filtCatalogStart = filtCatalogStop;
+			filtCatalogStop = filteredCatalogSize;
+		}
+
+		//ShowFilteredPreviews();
+		StopAllCoroutines();
+		StartCoroutine(LoadFilteredObjectPreviewsCo());
+	}
+
+	// scrolls UI list to show previous objects (for filters)
+	public void filtScrollBackward()
+	{
+		// check meed to scroll
+		if (!isActive)
+		{
+			Debug.LogWarning("Catalog off. Cannot Scroll");
+			return;
+		}
+		else if (filtCatalogStart == 0)
+		{
+			Debug.LogWarning("Start of catalog reached");
+			return;
+		}
+
+		Debug.Log("Scrolling back");
+
+		// remove buttons from view
+		toggleCatButtons(-1);
+
+		if (filtCatalogStart - 6 < 0)
+		{
+			filtCatalogStop = filtCatalogStart;
+			filtCatalogStart = 0;
+		}
+		else
+		{
+
+			filtCatalogStop = filtCatalogStart;
+			filtCatalogStart = filtCatalogStart - 6;
+		}
+
+		//ShowFilteredPreviews();
+		StopAllCoroutines();
+		StartCoroutine(LoadFilteredObjectPreviewsCo());
+	}
+
+	public GameObject getObjectByID(int id)
+	{
+		int i;
+		for (i = 0; i < catalogSize; i++)
+		{
+			if (categories[i].objectID == id)
+				break;
+		}
+
+		return Resources.Load<GameObject>("Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
+	}
+
+	public virtual void displayCatalog(object sender, ClickedEventArgs e)
+	{
+		if (isActive)
+		{
+			catOff();
+		}
+
+		else
+		{
+			catOn();
+		}
+
+
+	}
+
+
+	//Move all GameObjects to IgnoreRaycast layer
+	private void raycastIgnoreOtherObjects()
+	{
+		GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+		foreach (GameObject gObject in sceneObjects)
+		{
+			GameObject parentObject;
+			Transform parentTransform = gObject.transform;
+			while (parentTransform.parent != null)
+			{
+				parentTransform = parentTransform.parent;
+			}
+			parentObject = parentTransform.gameObject;
+			if (parentObject != catalogCanvas.gameObject)
+			{
+				gObject.layer = 2;
+			}
+		}
+	}
+
+	//Move all GameObjects back to default layer
+	private void raycastHitOtherObjects()
+	{
+		GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
+		foreach (GameObject gObject in sceneObjects)
+		{
+			GameObject parentObject;
+			Transform parentTransform = gObject.transform;
+			while (parentTransform.parent != null)
+			{
+				parentTransform = parentTransform.parent;
+			}
+			parentObject = parentTransform.gameObject;
+			if (parentObject != catalogCanvas)
+			{
+				if (parentObject.GetComponent<Furniture>() != null && parentObject.GetComponent<Furniture>().isMove)
+				{
+					gObject.layer = 2;
+				}
+				else
+					gObject.layer = 0;
+			}
+		}
+	}
+	/*
+	GameObject getGameObjectAtIndex(int indexInCatalog) {
 		if(indexInCatalog >= catalogSize) {
 			Debug.LogWarning("Index is larger than catalog size. Returning null");
 			return null;
@@ -413,12 +759,13 @@ public class CatalogManager : MonoBehaviour {
 		return catalog[indexInCatalog];
 	}
 
-	public void spawnRandom (Vector3 location) {
+	void spawnRandom (Vector3 location) {
 		int index = Random.Range(0, catalogSize);
 		Instantiate(catalog[index], location, catalog[index].transform.rotation);
 	}
+	
 
-	public void spawnObjectAtIndex (int indexInCatalog, Vector3 location) {
+	void spawnObjectAtIndex (int indexInCatalog, Vector3 location) {
 		if (indexInCatalog < 1 || indexInCatalog >= catalogSize) {
 			Debug.LogWarning("Button index out of range");
 			return;
@@ -427,7 +774,7 @@ public class CatalogManager : MonoBehaviour {
 		Instantiate(catalog[indexInCatalog], location, catalog[indexInCatalog].transform.rotation);
 	}
 
-	public void spawnObjectByID (int objectID, Vector3 location) {
+	void spawnObjectByID (int objectID, Vector3 location) {
 		for(int i = 0; i < catalogSize; i++) {
 			if(catalog[i].GetComponent<ObjectCategory>().objectID == objectID) {
 				Instantiate(catalog[i], location, catalog[i].transform.rotation);
@@ -437,228 +784,5 @@ public class CatalogManager : MonoBehaviour {
 		Debug.LogWarning("Object ID not found");
 	}
 
-    public GameObject getObjectByID(int objectID)
-    {
-        for (int i = 0; i < catalogSize; i++)
-        {
-            if (catalog[i].GetComponent<ObjectCategory>().objectID == objectID)
-            {
-                return catalog[i];
-            }
-        }
-        
-        Debug.LogWarning("Object ID not found");
-        return null;
-    }
-
-    public void spawnByCatalogButton(int buttonID, Vector3 location) {
-		if (buttonID < 1 || buttonID > 6) {
-			Debug.LogWarning("Button index out of range");
-			return;
-		}
-
-        Debug.Log("ButtonID: " + buttonID);
-
-        int index;
-        if (!filterActive)
-        {
-            index = (buttonID - 1) + catalogStart;
-            GameObject furniture = Instantiate(catalog[index], location, catalog[index].transform.rotation);
-            furniture.gameObject.layer = 2;
-            furniture.GetComponent<Furniture>().isMove = true;
-        }
-        else
-        {
-            index = (buttonID - 1) + filtCatalogStart;
-            GameObject furniture = Instantiate(catalog[indexInFilteredCatalog[index]], location, catalog[index].transform.rotation);
-            furniture.gameObject.layer = 2;
-            furniture.GetComponent<Furniture>().isMove = true;
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // code for filters
-    public ObjectCategory.ROOMCODE FiltRoomCode
-    {
-        get
-        {
-            return filtRoomCode;
-        }
-
-        set
-        {
-            filtRoomCode = value;
-            print("Room Filter: " + filtRoomCode);
-            getFilteredObjects();
-            //print("Room Filter: " + filtRoomCode);
-            titleText.text = "Catalog > Room: " + filtRoomCode + "    Category: " + filtTypeCode;
-        }
-    }
-
-    public ObjectCategory.OBJECTTYPE FiltTypeCode
-    {
-        get
-        {
-            return filtTypeCode;
-        }
-
-        set
-        {
-            filtTypeCode = value;
-            //print("Type Filter: " + filtTypeCode);
-            getFilteredObjects();
-            titleText.text = "Catalog > Room: " + filtRoomCode + "    Category: " + filtTypeCode;
-        }
-    }
-
-    private void getFilteredObjects()
-    {
-        filteredCatalogSize = 0;
-        filtCatalogStart = 0;
-        filtCatalogStop = 0;
-
-        if (filtRoomCode == ObjectCategory.ROOMCODE.ALL && filtTypeCode == ObjectCategory.OBJECTTYPE.ALL)
-        {
-            filterActive = false;
-            catalogStart = 0;
-            if (catalogSize > 6)
-                catalogStop = 6;
-            else
-                catalogStop = catalogSize;
-
-            ShowObjectPreviews();
-            return;
-        }
-        else if (!(filtRoomCode == ObjectCategory.ROOMCODE.ALL) && !(filtTypeCode == ObjectCategory.OBJECTTYPE.ALL))
-        {
-            for (int i = 0; i < catalogSize; i++)
-            {
-                if (catalog[i].GetComponent<ObjectCategory>().roomType == filtRoomCode && catalog[i].GetComponent<ObjectCategory>().objectType == filtTypeCode)
-                {
-                    indexInFilteredCatalog[filteredCatalogSize] = i;
-                    filteredCatalogSize++;
-                }
-            }
-        }
-        else if (!(filtRoomCode == ObjectCategory.ROOMCODE.ALL) && (filtTypeCode == ObjectCategory.OBJECTTYPE.ALL))
-        {
-            for (int i = 0; i < catalogSize; i++)
-            {
-                //Debug.Log(catalog[i].name);
-                if (catalog[i].GetComponent<ObjectCategory>().roomType == filtRoomCode)
-                {
-                    indexInFilteredCatalog[filteredCatalogSize] = i;
-                    filteredCatalogSize++;
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < catalogSize; i++)
-            {
-                if (catalog[i].GetComponent<ObjectCategory>().objectType == filtTypeCode)
-                {
-                    indexInFilteredCatalog[filteredCatalogSize] = i;
-                    filteredCatalogSize++;
-                }
-            }
-        }
-
-        filterActive = true;
-
-        filtCatalogStart = 0;
-        if (filteredCatalogSize > 6)
-            filtCatalogStop = 6;
-        else
-            filtCatalogStop = filteredCatalogSize;
-
-        ShowFilteredPreviews();
-    }
-
-    private void ShowFilteredPreviews()
-    {
-        int previewsToShow;
-
-        previewsToShow = filtCatalogStop % 6;
-        if (filteredCatalogSize == 0)
-        {
-            toggleCatButtons(-1);
-            return;
-        }
-        else
-            toggleCatButtons(previewsToShow);
-
-        for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
-        {
-            previews[i].sprite = catalogPreviews[indexInFilteredCatalog[showing]];
-        }
-    }
-
-    public void filtScrollForward()
-    {
-        // check meed to scroll
-        if (!isActive)
-        {
-            Debug.LogWarning("Catalog off. Cannot Scroll");
-            return;
-        }
-        else if (filtCatalogStop == filteredCatalogSize)
-        {
-            Debug.LogWarning("End of catalog reached");
-            return;
-        }
-
-        Debug.Log("Scrolling forward");
-
-        // remove buttons from view
-        toggleCatButtons(-1);
-
-
-        if (filtCatalogStop + 6 < filteredCatalogSize)
-        {
-            filtCatalogStart = filtCatalogStop;
-            catalogStop += 6;
-        }
-        else
-        {
-            filtCatalogStart = filtCatalogStop;
-            filtCatalogStop = filteredCatalogSize;
-        }
-
-        ShowFilteredPreviews();
-    }
-
-    public void filtScrollBackward()
-    {
-        // check meed to scroll
-        if (!isActive)
-        {
-            Debug.LogWarning("Catalog off. Cannot Scroll");
-            return;
-        }
-        else if (filtCatalogStart == 0)
-        {
-            Debug.LogWarning("Start of catalog reached");
-            return;
-        }
-
-        Debug.Log("Scrolling back");
-
-        // remove buttons from view
-        toggleCatButtons(-1);
-
-        if (filtCatalogStart - 6 < 0)
-        {
-            filtCatalogStop = filtCatalogStart;
-            filtCatalogStart = 0;
-        }
-        else
-        {
-
-            filtCatalogStop = filtCatalogStart;
-            filtCatalogStart = filtCatalogStart - 6;
-        }
-
-        ShowFilteredPreviews();
-    }
+	*/
 }

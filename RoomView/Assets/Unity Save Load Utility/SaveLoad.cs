@@ -30,8 +30,6 @@ public static class SaveLoad {
 
 		FileStream file = File.Create (saveGamePath + saveGame.savegameName + ".sav"); //you can call it anything you want including the file extension
 		bf.Serialize(file, saveGame);
-        Debug.Log("Before closing the file in SaveLoad, the objects saved count is below");
-        Debug.Log(saveGame.sceneObjects.Count);
 		file.Close();
 	}	
 	
@@ -52,10 +50,7 @@ public static class SaveLoad {
 			FileStream file = File.Open(saveGamePath + gameToLoad + ".sav", FileMode.Open);
 			SaveGame loadedGame = (SaveGame)bf.Deserialize(file);
 			file.Close();
-            Debug.Log("Before closing the file in SaveLoad, the objects load count is below");
-            Debug.Log(loadedGame.sceneObjects.Count);
-			
-                return loadedGame;
+			return loadedGame;
 		}
 		else {
 			Debug.Log(gameToLoad + " does not exist!");
