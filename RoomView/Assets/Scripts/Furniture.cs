@@ -7,30 +7,35 @@ using UnityEngine.UI;
 public class Furniture : MonoBehaviour {
 
     public SteamVR_TrackedObject controller;
-    public Material highlightMaterial;
     public GameObject contextMenuPrefab;
     public static bool isFurnitureSelected = false;
     public bool isSelected = false;
     public bool isRotate = false;
     public bool isMove = false;
     public bool isClone = false;
-    public Material[] materialArray;
-    public Material[] materialArrayWithHighlight;
-
     public bool fromCatalog = false;
     public bool needsPlacement = false;
     public bool placing = false;
 
+    //[DontSaveMember] private Material highlightMaterial;
+
+    //[DontSaveMember] private Material[] materialArray;
+
+    //[DontSaveMember] private Material[] materialArrayWithHighlight;
 
     private Vector3 offset;
     private SteamVR_TrackedController controllerInput;
     private SteamVR_LaserPointer pointer;
-    private bool isHover = false;
-    private bool isMoving = false;
+    public bool isHover = false;
+    public bool isMoving = false;
     private Quaternion targetRotation = Quaternion.identity;
     private Vector3 rotationDifference;
     private float padX;
     private int id;
+
+	//[DontSaveMember]
+	//Material thisShader;
+    
 
 
     // Use this for initialization
@@ -61,20 +66,33 @@ public class Furniture : MonoBehaviour {
     {
         contextMenuPrefab = Resources.Load("UI Prefabs/ContextMenu") as GameObject;
         id = GetComponent<ObjectCategory>().objectID;
-        
-        if (!isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
+        /*
+        highlightMaterial = Resources.Load("Materials/HoverHighlight") as Material;
+
+        List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
+        List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
+        if ( !isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
         {
-            List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
-            List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
             newMaterials.Add(highlightMaterial);
-            materialArray = materials.ToArray();
-            materialArrayWithHighlight = newMaterials.ToArray();
         }
         else
+        {
+            materials.RemoveAt(materials.Count - 1);
+            pointer.PointerIn += OnHover;
+            pointer.PointerOut += OffHover;
+            controllerInput.PadClicked += OnPadClicked;
+        }
+        
+        materialArrayWithHighlight = newMaterials.ToArray();
+        materialArray = materials.ToArray();
+        */
+
+        if (isClone)
         {
             pointer.PointerIn += OnHover;
             pointer.PointerOut += OffHover;
             controllerInput.PadClicked += OnPadClicked;
+			//isClone = false;
         }
 
         if (controller == null)
@@ -96,6 +114,19 @@ public class Furniture : MonoBehaviour {
         objectIdentifier.id = gameObject.GetComponent<ObjectCategory>().objectID.ToString();
         objectIdentifier.componentSaveMode = ObjectIdentifier.ComponentSaveMode.All;
 
+        try {
+			GetComponent<MeshRenderer>().sharedMaterial = new Material(GetComponent<MeshRenderer>().sharedMaterial);
+		}
+		catch {
+			MeshRenderer[] renders = GetComponentsInChildren<MeshRenderer>();
+			foreach(MeshRenderer renderer in renders) {
+				renderer.sharedMaterial = new Material(renderer.sharedMaterial);
+			}
+		}
+		
+		//thisShader = GetComponent<MeshRenderer>().sharedMaterial;
+
+		UnityEditor.PrefabUtility.DisconnectPrefabInstance(this);
     }
 
     private void Update()
@@ -152,11 +183,36 @@ public class Furniture : MonoBehaviour {
             transform.position = hit.point + offset;
         }
 
-
         if (isSelected || isHover)//If hover or selected highlight
-            gameObject.GetComponent<MeshRenderer>().materials = materialArrayWithHighlight;
-        else
-            gameObject.GetComponent<MeshRenderer>().materials = materialArray;
+        {
+            //gameObject.GetComponent<MeshRenderer>().materials = materialArrayWithHighlight;
+			try {
+				GetComponent<MeshRenderer>().sharedMaterial.SetColor("_EmissionColor", new Color(0.2f, 0.2f, 0.2f));
+			}
+			catch {
+				MeshRenderer[] renders = GetComponentsInChildren<MeshRenderer>();
+				foreach (MeshRenderer  renderer in renders) {
+					renderer.sharedMaterial.SetColor("_EmissionColor", new Color(0.2f, 0.2f, 0.2f));
+				}
+			}
+		}
+
+        else {
+			try
+			{
+				GetComponent<MeshRenderer>().sharedMaterial.SetColor("_EmissionColor", new Color());
+			}
+			catch
+			{
+				MeshRenderer[] renders = GetComponentsInChildren<MeshRenderer>();
+				foreach (MeshRenderer renderer in renders)
+				{
+					renderer.sharedMaterial.SetColor("_EmissionColor", new Color());
+				}
+			}
+		}
+			
+
 
     }
 
@@ -209,6 +265,16 @@ public class Furniture : MonoBehaviour {
         isFurnitureSelected = true;
         
     }
+    /*
+    public void setMaterialArray(Material[] newarray)
+    {
+        materialArray = newarray;
+    }
+
+    public Material[] getMaterialArray()
+    {
+        return materialArray;
+}*/
 
     private void OnPadClicked(object sender, ClickedEventArgs e)
     {
@@ -222,4 +288,6 @@ public class Furniture : MonoBehaviour {
         controllerInput.TriggerClicked -= OnSelectButton;
         controllerInput.PadClicked -= OnPadClicked;
     }
+
+    
 }

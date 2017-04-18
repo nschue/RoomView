@@ -106,7 +106,7 @@ public class CatalogManager : MonoBehaviour
 		}
 
 		Debug.Log("Waiting for load");
-		yield return new WaitForSeconds(2.0f);
+		yield return new WaitForSeconds(0.5f);
 
 		for (int i = catalogStart; i < catalogStop; i++)
 		{
@@ -116,7 +116,7 @@ public class CatalogManager : MonoBehaviour
 			if (texture == null)
 			{
 				Debug.Log("Loading object: " + "Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
-				yield return new WaitForSeconds(0.5f);
+				yield return new WaitForSeconds(0.1f);
 				i--;
 				continue;
 			}
@@ -137,6 +137,8 @@ public class CatalogManager : MonoBehaviour
 		Texture2D texture;
 		Sprite newSprite;
 
+		print(filtCatalogStart);
+		print(filtCatalogStop);
 		for (int i = filtCatalogStart; i < filtCatalogStop; i++)
 		{
 			print(catalogNames[indexInFilteredCatalog[i]].Substring(25, catalogNames[indexInFilteredCatalog[i]].Length - 7 - 25));
@@ -145,7 +147,7 @@ public class CatalogManager : MonoBehaviour
 
 		Debug.Log("Waiting for load");
 		yield return new WaitForSeconds(0.5f);
-		Debug.Log("Done Loading");
+		
 
 		for (int i = filtCatalogStart; i < filtCatalogStop; i++)
 		{
@@ -161,10 +163,10 @@ public class CatalogManager : MonoBehaviour
 			}
 
 			newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-			print("working");
 			currentCatSprites[i % 6] = newSprite;
 		}
 
+		Debug.Log("Done Loading");
 		ShowCurrentFilteredPreviews();
 		yield return null;
 	}
@@ -174,25 +176,19 @@ public class CatalogManager : MonoBehaviour
 	{
 		int previewsToShow;
 		previewsToShow = filtCatalogStop % 6;
+		
 
-		if (roomOptions.optionsDisplaying)
-		{
-			return;
-		}
-		else if (isActive)
-		{
+		if(filteredCatalogSize == 0) {
 			toggleCatButtons(-1);
 			return;
 		}
 		else
 			toggleCatButtons(previewsToShow);
 
-
-		if (filteredCatalogSize == 0)
-			for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
-			{
-				previews[i].sprite = currentCatSprites[i];
-			}
+		for (int i = 0, showing = filtCatalogStart; showing < filtCatalogStop; i++, showing++)
+		{
+			previews[i].sprite = currentCatSprites[i];
+		}
 	}
 
 	// Loads the previews into the UI (for non-filters)
@@ -478,6 +474,7 @@ public class CatalogManager : MonoBehaviour
 			index = (buttonID - 1) + catalogStart;
 
 			toSpawn = Resources.Load<GameObject>("Prefabs/" + catalogNames[index].Substring(25, catalogNames[index].Length - 7 - 25));
+			Debug.Log("Spawning: " + toSpawn.name);
 			GameObject furniture = Instantiate(toSpawn, location, toSpawn.transform.rotation);
 			furniture.gameObject.layer = 2;
 			furniture.GetComponent<Furniture>().isMove = true;
@@ -488,6 +485,7 @@ public class CatalogManager : MonoBehaviour
 		{
 			index = (buttonID - 1) + filtCatalogStart;
 			toSpawn = Resources.Load<GameObject>("Prefabs/" + catalogNames[indexInFilteredCatalog[index]].Substring(25, catalogNames[indexInFilteredCatalog[index]].Length - 7 - 25));
+			Debug.Log("Spawning: " + toSpawn.name);
 			GameObject furniture = Instantiate(toSpawn, location, toSpawn.transform.rotation);
 			furniture.gameObject.layer = 2;
 			furniture.GetComponent<Furniture>().isMove = true;
@@ -610,16 +608,17 @@ public class CatalogManager : MonoBehaviour
 		// check meed to scroll
 		if (!isActive)
 		{
-			Debug.LogWarning("Catalog off. Cannot Scroll");
+			Debug.LogWarning("[Filt] Catalog off. Cannot Scroll");
 			return;
 		}
 		else if (filtCatalogStop == filteredCatalogSize)
 		{
-			Debug.LogWarning("End of catalog reached");
+			Debug.LogWarning("[Filt] End of catalog reached");
 			return;
 		}
 
-		Debug.Log("Scrolling forward");
+		Debug.Log("[Filt] Scrolling forward");
+		print("There are " + filteredCatalogSize +" objects in this filter");
 
 		// remove buttons from view
 		toggleCatButtons(-1);
@@ -628,7 +627,7 @@ public class CatalogManager : MonoBehaviour
 		if (filtCatalogStop + 6 < filteredCatalogSize)
 		{
 			filtCatalogStart = filtCatalogStop;
-			catalogStop += 6;
+			filtCatalogStop += 6;
 		}
 		else
 		{
@@ -647,16 +646,16 @@ public class CatalogManager : MonoBehaviour
 		// check meed to scroll
 		if (!isActive)
 		{
-			Debug.LogWarning("Catalog off. Cannot Scroll");
+			Debug.LogWarning("[Filt] Catalog off. Cannot Scroll");
 			return;
 		}
 		else if (filtCatalogStart == 0)
 		{
-			Debug.LogWarning("Start of catalog reached");
+			Debug.LogWarning("[Filt] Start of catalog reached");
 			return;
 		}
 
-		Debug.Log("Scrolling back");
+		Debug.Log("[Filt] Scrolling back");
 
 		// remove buttons from view
 		toggleCatButtons(-1);
