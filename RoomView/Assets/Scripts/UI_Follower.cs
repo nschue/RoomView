@@ -1,14 +1,24 @@
-﻿using UnityEngine;
+﻿/*!
+ * \author Luis Diaz Jr
+ * \version 1.0
+ * \date 4-17-2017
+ *
+ * \mainpage The UI Follower
+ */ 
+using UnityEngine;
 using System.Collections;
 
 public class UI_Follower : MonoBehaviour {
 
-	public GameObject mainCamera;			// camera gameobject (for use in tracking)
-	public GameObject snappedObject;		// gameObject snapped to (for use in tracking)
+	public GameObject mainCamera;			//!< camera gameobject (for use in tracking)
+	public GameObject snappedObject;		//!< gameObject snapped to (for use in tracking)
 
-	private Vector3 offset;					// used to set the position between snappedObject and mainCamera
+	private Vector3 offset;					//!< used to set the position between snappedObject and mainCamera
 
-	// Use this for initialization
+	/*!
+	 * \brief Set the context menu at 50% distance between the snapped object and the camera
+	 * \details Runs at start and sets the offset position
+	 */
 	void Start () {
 
 		// set menu midway between both objects (50% between)
@@ -16,7 +26,10 @@ public class UI_Follower : MonoBehaviour {
 		transform.position = offset;
 	}
 	
-	// Update is called once per frame
+	/*!
+	 * \brief Set the context menu at 50% distance between the snapped object and the camera. Faces the UI toward the camera
+	 * \details Runs at every frame
+	 */
 	void Update () {
 
 		// set menu midway between both objects (50% between)
@@ -27,7 +40,9 @@ public class UI_Follower : MonoBehaviour {
 		transform.LookAt(mainCamera.transform);
 	}
 	
-	// sets the snappedObject
+	/*!
+	 * \brief Sets the snapped object to hover around
+	 */
 	public void setSnappedObject(GameObject newGO) {
         
 		snappedObject = newGO;
