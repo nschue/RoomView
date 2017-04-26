@@ -1,25 +1,35 @@
-﻿using System.Collections;
+﻿/*!
+ * \author Luis Diaz Jr
+ * \version 1.0
+ * \date 4-17-2017
+ *
+ * \mainpage Context Menu Button Controller
+ */ 
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class ContextMenuButton : MenuButton {
 
-
-    public enum action
+	
+    public enum action		
     {
         move, rotate, clone, del
-    }
+    }								//!< enum that defines four actions to perform
 
-    public Sprite onSprite;     // holds the on sprite
-    public Sprite offSprite;    // holds the off sprite
-    public action selectedAction;
+    public Sprite onSprite;     	//!< pointer to on sprite
+    public Sprite offSprite;    	//!< pointer to off sprite
+    public action selectedAction;	//!< holds the currently selected action
 
-    private GameObject snappedObject;
-    private static bool isContextMenu; 
-    private bool isOn = false;	// button status
-    private UnityEngine.UI.Image buttonImage;
+    private GameObject snappedObject;			//!< pointer to the object this menu will hover around
+    private static bool isContextMenu; 			//!< flag to detect if this menu is currently active
+    private bool isOn = false;					//!< button status
+    private UnityEngine.UI.Image buttonImage;	//!< pointer to image gameobject
 
+	/*!
+	 * \brief Runs upon gameobject spawn (at start) and initializes variables, sets listeners, and snapped object
+	 */
     private void Start()
     {
         buttonImage = GetComponent<UnityEngine.UI.Image>();
@@ -27,7 +37,9 @@ public class ContextMenuButton : MenuButton {
         snappedObject = transform.parent.gameObject.GetComponent<UI_Follower>().snappedObject;
     }
 
-    // sets the off sprite and flag
+	/*!
+	 * \brief sets the off sprite and flag
+	 */
     public void turnOff()
     {
         if (!isOn)
@@ -37,7 +49,9 @@ public class ContextMenuButton : MenuButton {
         isOn = false;
     }
 
-    //sets the on sprite and flag
+	/*!
+	 * \brief sets the on sprite and flag
+	 */
     public void turnOn()
     {
         if (isOn)
@@ -47,22 +61,30 @@ public class ContextMenuButton : MenuButton {
         isOn = true;
     }
 
+	/*!
+	 * \brief removes the snapped object and removes highlight from deselected object
+	 */
     private void DeselectFurniture()
     {
         snappedObject.GetComponent<Furniture>().isSelected = false;
         Furniture.isFurnitureSelected = false;
     }
 
+	/*!
+	 * \brief sets the flag to start a move in selected object
+	 */
     private void MoveFurniture()
     {
         snappedObject.layer = 2;
         snappedObject.GetComponent<Furniture>().isMove = true;
     }
 
+	/*!
+	 * \brief Begins the listener to rotate the selected object
+	 * \details Hides the context menu button while keeping it in the scene. This prevents event listener from being lost before the user is done rotating the object.
+	 */
     private void RotateFurniture()
     {
-        //Hides the context menu button while keeping it in the scene
-        //This prevents event listener from being lost before the user is done rotating the object. 
         foreach(Transform child in transform.parent)
         {
             child.gameObject.SetActive(false);
@@ -71,6 +93,9 @@ public class ContextMenuButton : MenuButton {
         controllerInput.PadUnclicked += OnPadUnclickedStopRotate;
     }
 
+	/*!
+	 * \brief Clones the selected(snapped) object and sets the flags to begin placement(move flags)
+	 */
     private void CloneFurniture()
     {
         DeselectFurniture();
@@ -84,6 +109,10 @@ public class ContextMenuButton : MenuButton {
         Furniture.isFurnitureSelected = true;
     }
 
+	/*!
+	 * \brief Closes the context menu
+	 * \details Closes when clicked off the menu or at a different object
+	 */
     private void OnTriggerCloseContextMenu(object sender, ClickedEventArgs e)
     {
         if (!isContextMenu)//If not pointed at another context menu button
@@ -94,6 +123,10 @@ public class ContextMenuButton : MenuButton {
         }
     }
 
+	/*!
+	 * \brief Sets button to ON(hovered)
+	 * \details Sets HOVERED flags and turns on the sprite
+	 */
     public override void OnHover(object sender, PointerEventArgs e)
     {
         if (e.target == GetComponent<Collider>().transform)
@@ -103,7 +136,11 @@ public class ContextMenuButton : MenuButton {
             controllerInput.TriggerClicked += OnSelectButton;
         }
     }
-
+	
+	/*!
+	 * \brief Sets button to OFF
+	 * \details Sets HOVERED flags and turns off the sprite
+	 */
     public override void OffHover(object sender, PointerEventArgs e)
     {
         if (e.target == GetComponent<Collider>().transform)
@@ -113,6 +150,11 @@ public class ContextMenuButton : MenuButton {
             controllerInput.TriggerClicked -= OnSelectButton;
         }
     }
+	
+	/*!
+	 * \brief Performs selected action when trigger is clicked
+	 * \details Once clicked, it checks the selected action and performs that action.
+	 */
     public override void OnSelectButton(object sender, ClickedEventArgs e)
     {
         Debug.Log(selectedAction + "context menu button pressed");
@@ -140,21 +182,28 @@ public class ContextMenuButton : MenuButton {
                 Destroy(gameObject.transform.parent.gameObject);
                 break;
         }
-
-        
-
     }
 
+	/*!
+	 * \brief Sets rotate flags when touchpad pad is pressed
+	 */
     private void OnPadClickedRotate(object sender, ClickedEventArgs e)
     {
         snappedObject.GetComponent<Furniture>().isRotate = true;
     }
 
+	/*!
+	 * \brief Sets rotate flags when touchpad pad is released
+	 */
     private void OnPadUnclickedStopRotate(object sender, ClickedEventArgs e)
     {
         snappedObject.GetComponent<Furniture>().isRotate = false;
     }
 
+	/*!
+	 * \brief Runs when the menu is removed from the scene
+	 * \details removes all listeners to prevent them from using resources
+	 */
     private void OnDestroy()
     {
         Debug.Log("Running OnDestroy for Context Menu Button: " + selectedAction);
@@ -166,5 +215,4 @@ public class ContextMenuButton : MenuButton {
         controllerInput.PadClicked -= OnPadClickedRotate;
         controllerInput.PadUnclicked -= OnPadUnclickedStopRotate;
     }
-
 }
