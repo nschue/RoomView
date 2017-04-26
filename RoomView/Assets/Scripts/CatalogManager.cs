@@ -1,39 +1,48 @@
-﻿using UnityEngine;
+﻿/*!
+ * \author Luis Diaz Jr
+ * \version 1.0
+ * \date 4-17-2017
+ *
+ * \mainpage The Catalog Manager 
+ * \bug The buttons may glitch and take on the image of whatever sprite was loaded in last in the catalog onscreen
+ */ 
+using UnityEngine;
 using System.Collections;
 using System.IO;
 
 public class CatalogManager : MonoBehaviour
 {
-	public Canvas catalogCanvas;
-	public SteamVR_TrackedController controllerInput;
+	public Canvas catalogCanvas;						//!< pointer to the canvas that holds the catalog GUI gameObjects
+	public SteamVR_TrackedController controllerInput;	//!< pointer to the controller
 	public RoomOptions roomOptions;
-
 	[HideInInspector]
-	public bool isActive = false;            // flag to show if UI is on screen
+	public bool isActive = false;            	//!< flag to show if UI is on screen
 
-	private string[] catalogNames;            // holds names of all prefabs in the prefabs folder (full path name)
-	private Sprite[] currentCatSprites;      // currently loaded sprites (up to six)
-	private ObjectCategory[] categories;        // holds filter codes for all prefabs
-	private int catalogSize;                    // size of prefab array (objects)
-	private int catalogStart;                  // start index
-	private int catalogStop;                    // stop index
+	private string[] catalogNames;            	//!< holds names of all prefabs in the prefabs folder (full path name)
+	private Sprite[] currentCatSprites;      	//!< currently loaded sprites (up to six)
+	private ObjectCategory[] categories;        //!< holds filter codes for all prefabs
+	private int catalogSize;                    //!< size of catalog array (count of all objects available for placement)
+	private int catalogStart;                  	//!< display start index
+	private int catalogStop;                    //!< display stop index
+	private UnityEngine.UI.Image[] previews;    //!< pointer gameobject[] for the prefab previews
+	private UnityEngine.UI.Image[] backs;      	//!< pointer gameobject[] for the prefab preview buttons
 
-	private UnityEngine.UI.Image[] previews;    // placeholder gameobjects for the prefab previews
-	private UnityEngine.UI.Image[] backs;      // placeholder gameobjects for the prefab preview buttons
-
-	private ObjectCategory.ROOMCODE filtRoomCode = ObjectCategory.ROOMCODE.ALL;      // filter code: room type
-	private ObjectCategory.OBJECTTYPE filtTypeCode = ObjectCategory.OBJECTTYPE.ALL;  // filter code: object type
-	private int[] indexInFilteredCatalog;      // array to store indexes of gameobjects in "catalog names" that match the current filters
-	private int filteredCatalogSize;            // size of the filtered index array
-	private int filtCatalogStart;              // start index of the filtered index array
-	private int filtCatalogStop;                // stop index of the filtered index array
-	private bool filterActive = false;        // flag for filter
-	private UnityEngine.UI.Text titleText;    // placeholder for UI title text
-
+	private ObjectCategory.ROOMCODE filtRoomCode = ObjectCategory.ROOMCODE.ALL;      //!< filter code: room type
+	private ObjectCategory.OBJECTTYPE filtTypeCode = ObjectCategory.OBJECTTYPE.ALL;  //!< filter code: object type
+    private int[] indexInFilteredCatalog;      	//!< array to store indexes of gameobjects in "catalog names" that match the current filters
+    private int filteredCatalogSize;            //!< size of the filtered index array
+    private int filtCatalogStart;              	//!< display start index of the filtered index array
+    private int filtCatalogStop;                //!< display stop index of the filtered index array
+    private bool filterActive = false;        	//!< flag for filters
+    private UnityEngine.UI.Text titleText;    	//!< placeholder for UI title text
 
 
 
-	// initialization
+
+	/*!
+	 * \brief Runs upon gameobject spawn (at start) and initializes variables
+	 * \details This function initializes the pointers to the scene gameObjects, loads the sprites\prefabs from memory, and sets the controller listeners.
+	 */
 	public void Start()
 	{
 		titleText = GameObject.Find("Title Text").GetComponent<UnityEngine.UI.Text>();
@@ -80,7 +89,10 @@ public class CatalogManager : MonoBehaviour
 		controllerInput.MenuButtonClicked += displayCatalog;
 	}
 
-	// Populates the categories array with each object's filter codes
+	/*!
+	 * \brief Populates the categories array with each object's filter codes
+	 * \details [Async Task] This function grabs a copy of the Categories component in each prefab to help with sorting.
+	 */
 	IEnumerator getObjectCodes()
 	{
 		for (int i = 0; i < catalogSize; i++)
@@ -89,8 +101,10 @@ public class CatalogManager : MonoBehaviour
 		yield return null;
 	}
 
-	// Loads up to 6 previews into memory to be displayed
-	// uses the start/stop variables to decide which previews to load
+	/*!
+	 * \brief Loads up to 6 previews into memory to be displayed
+	 * \details [Async Task] The function uses the start/stop index variables to decide which previews to load from memory
+	 */
 	IEnumerator LoadObjectPreviewsCo()
 	{
 		Texture2D texture;
@@ -130,8 +144,10 @@ public class CatalogManager : MonoBehaviour
 		yield return null;
 	}
 
-	// Loads up to 6 previews into memory to be displayed
-	// uses the filter start/stop variables to decide which previews to load
+	/*!
+	 * \brief [Filter] Loads up to 6 previews into memory to be displayed
+	 * \details [Async Task] The function uses the filter start/stop index variables to decide which previews to load from memory
+	 */
 	IEnumerator LoadFilteredObjectPreviewsCo()
 	{
 		Texture2D texture;
@@ -171,7 +187,10 @@ public class CatalogManager : MonoBehaviour
 		yield return null;
 	}
 
-	// Loads the previews into the UI (for filters)
+	/*!
+	 * \brief Loads the previews into the UI (for filters)
+	 * \details uses the start/stop indexes to only load the needed buttons and sprites
+	 */
 	private void ShowCurrentFilteredPreviews()
 	{
 		int previewsToShow;
@@ -191,7 +210,10 @@ public class CatalogManager : MonoBehaviour
 		}
 	}
 
-	// Loads the previews into the UI (for non-filters)
+	/*!
+	 * \brief Loads the previews into the UI (for filters)
+	 * \details uses the start/stop indexes to only load the needed buttons and sprites
+	 */
 	private void ShowCurrentObjectPreviews()
 	{
 		int previewsToShow = catalogStop % 6;
@@ -203,7 +225,11 @@ public class CatalogManager : MonoBehaviour
 		}
 	}
 
-	// shows/hides the catalog buttons depending on available objects
+	/*!
+	 * \brief shows/hides the catalog buttons depending on available objects
+	 * \param previewsToShow number of buttons to show/hide
+	 * \details This function uses the switch statement on previews to show to activate/deactive the preview/back image gameobjects from view
+	 */
 	private void toggleCatButtons(int previewsToShow)
 	{
 		switch (previewsToShow)
@@ -332,7 +358,10 @@ public class CatalogManager : MonoBehaviour
 
 
 
-	// hides the catalog from view, resets the filter flag and active flag
+	/*!
+	 * \brief Hides the catalog from view, resets the filter flag and active flag
+	 * \details This function deactivates the catalog preview gameObject and hides it 100 units below the scene. isActive/Filter flags reset. start/stop indexes reset to ensure the prefabs load from index 0.
+	 */
 	public void catOff()
 	{
 		Debug.Log("Catalog off");
@@ -353,7 +382,10 @@ public class CatalogManager : MonoBehaviour
 
 	}
 
-	// shows the catalog, resets filter codes, title text, and active flags
+	/*!
+	 * \brief Shows the catalog, resets filter codes, title text, and active flags
+	 * \details This function activates the catalog preview gameObject and moves it in front of the user. isActive flag set. Prefab sprites are loaded from memory.
+	 */
 	public void catOn()
 	{
 		StartCoroutine(LoadObjectPreviewsCo());
@@ -371,7 +403,10 @@ public class CatalogManager : MonoBehaviour
 		raycastIgnoreOtherObjects();
 	}
 
-	// scrolls UI list to show next available objects (stops if none available)
+	/*!
+	 * \brief Scrolls UI list to show next available objects (stops if none available)
+	 * \details This function scrolls to the next available prefabs, by updating start/stop indexes, and loads their preview sprites into view from memory.
+	 */
 	public void scrollForward()
 	{
 		// check meed to scroll
@@ -414,7 +449,10 @@ public class CatalogManager : MonoBehaviour
 		//ShowObjectPreviews();
 	}
 
-	// scrolls UI list to show previous objects (stops if at the start of list)
+	/*!
+	 * \brief Scrolls UI list to show previous objects (stops if at the start of list)
+	 * \details This function scrolls to the previous available prefabs, by updating start/stop indexes, and loads their preview sprites into view from memory.
+	 */
 	public void scrollBackward()
 	{
 		// check meed to scroll
@@ -458,7 +496,12 @@ public class CatalogManager : MonoBehaviour
 
 
 
-	// spawns objects by button ID (object spawned corresponds to object in the button's preview)
+	/*!
+	 * \brief Spawns objects by button ID (object spawned corresponds to object in the button's preview)
+	 * \param buttonID The ID of the selected button
+	 * \param location Specifies where to spawn the object
+	 * \details This function spawns the object that matches the preview selected in the GUI button.
+	 */
 	public void spawnByCatalogButton(int buttonID, Vector3 location)
 	{
 		if (buttonID < 1 || buttonID > 6)
@@ -494,11 +537,10 @@ public class CatalogManager : MonoBehaviour
 
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	// code for filters
-	//////////////////////////////////////////////////////////////////////////////////////////////
-
-	// sets the room type filter
+	/*!
+	 * \brief Getter/setter for FiltRoomCode
+	 * \details This function updates filter values and starts a search for objects that match the current filters
+	 */
 	public ObjectCategory.ROOMCODE FiltRoomCode
 	{
 		get
@@ -516,7 +558,10 @@ public class CatalogManager : MonoBehaviour
 		}
 	}
 
-	// sets the object type filter
+	/*!
+	 * \brief Getter/setter for FiltTypeCode
+	 * \details This function updates filter values and starts a search for objects that match the current filters
+	 */
 	public ObjectCategory.OBJECTTYPE FiltTypeCode
 	{
 		get
@@ -533,8 +578,10 @@ public class CatalogManager : MonoBehaviour
 		}
 	}
 
-	// retrieves the index of all objects that match current filters and stores them in "indexInFilteredCatalog[]"
-	// sets the filtered catalog size, start, stop, and filter flag
+	/*!
+	 * \brief Retrieves the index of all objects that match current filters and stores them in "indexInFilteredCatalog[]"
+	 * \details This function searches for objects, sets the filtered catalog size, start/stop indexes, and filter flag
+	 */
 	private void getFilteredObjects()
 	{
 		filteredCatalogSize = 0;
@@ -602,7 +649,10 @@ public class CatalogManager : MonoBehaviour
 		StartCoroutine(LoadFilteredObjectPreviewsCo());
 	}
 
-	// scrolls UI list to show next available objects (for filters)
+	/*!
+	 * \brief [Filter] Scrolls UI list to show next available objects (stops if none available)
+	 * \details This function scrolls to the next available prefabs, by updating start/stop indexes, and loads their preview sprites into view from memory.
+	 */
 	public void filtScrollForward()
 	{
 		// check meed to scroll
@@ -640,7 +690,10 @@ public class CatalogManager : MonoBehaviour
 		StartCoroutine(LoadFilteredObjectPreviewsCo());
 	}
 
-	// scrolls UI list to show previous objects (for filters)
+	/*!
+	 * \brief [Filter] Scrolls UI list to show previous available objects (stops if none available)
+	 * \details This function scrolls to the previous available prefabs by updating start/stop indexes, and loads their preview sprites into view from memory.
+	 */
 	public void filtScrollBackward()
 	{
 		// check meed to scroll
@@ -677,6 +730,11 @@ public class CatalogManager : MonoBehaviour
 		StartCoroutine(LoadFilteredObjectPreviewsCo());
 	}
 
+	/*!
+	 * \brief Loads the gameObject from memory that matches the given ID
+	 * \param id ID of the object to spawn.
+	 * \details This function searches the categories array for an object that matches the given ID. Loads from memory when a match is made, null if does not exist.
+	 */
 	public GameObject getObjectByID(int id)
 	{
 		int i;
@@ -689,6 +747,11 @@ public class CatalogManager : MonoBehaviour
 		return Resources.Load<GameObject>("Prefabs/" + catalogNames[i].Substring(25, catalogNames[i].Length - 7 - 25));
 	}
 
+	/*!
+	 * \brief toggles the catalog on/off from view
+	 * \param sender Object that made the call to this function
+	 * \param e Arguments attached to this event.
+	 */
 	public virtual void displayCatalog(object sender, ClickedEventArgs e)
 	{
 		if (isActive)
@@ -705,7 +768,10 @@ public class CatalogManager : MonoBehaviour
 	}
 
 
-	//Move all GameObjects to IgnoreRaycast layer
+	/*!
+	 * \brief Move all GameObjects to IgnoreRaycast layer
+	 * \details This function removes the collision between objects when catalog GUI is active
+	 */
 	private void raycastIgnoreOtherObjects()
 	{
 		GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
@@ -725,7 +791,10 @@ public class CatalogManager : MonoBehaviour
 		}
 	}
 
-	//Move all GameObjects back to default layer
+	/*!
+	 * \brief Move all GameObjects back to default layer
+	 * \details This function restores the collision between objects when catalog GUI is deactivated
+	 */
 	private void raycastHitOtherObjects()
 	{
 		GameObject[] sceneObjects = GameObject.FindObjectsOfType(typeof(GameObject)) as GameObject[];
@@ -749,6 +818,7 @@ public class CatalogManager : MonoBehaviour
 			}
 		}
 	}
+	
 	/*
 	GameObject getGameObjectAtIndex(int indexInCatalog) {
 		if(indexInCatalog >= catalogSize) {
