@@ -1,32 +1,41 @@
-﻿using UnityEngine;
+﻿/*!
+ * \author Luis Diaz Jr
+ * \version 1.0
+ * \date 4-17-2017
+ *
+ * \mainpage The Filter Button Controller
+ * \bug The buttons may not show the proper sprites, check them in the inspector
+ */ 
+using UnityEngine;
 using System.Collections;
 
 public class FilterButton : MonoBehaviour {
 
-	public CatalogManager manager;
-	public Sprite offSprite;
-	public Sprite onSprite;
-	public bool isOn = false;  // button status
-	public bool roomFilterActive = false;
-	public bool typeFilterActive = false;
+	public CatalogManager manager;						//!< pointer to the catalog
+	public Sprite offSprite;							//!< points to the offSprite in assets
+	public Sprite onSprite;								//!< points to the onSprite in assets
+	public bool isOn = false;  							//!< button status
+	public bool roomFilterActive = false;				//!< flag if a roomType filter is active
+	public bool typeFilterActive = false;				//!< flag if a objType filter is active
 	[Range(9, 27)]
 	[Header("9-16 room filters; 17-27 type filters")]
-	public int buttonID;
-	public ObjectCategory.ROOMCODE buttonRoomCode;
-	public ObjectCategory.OBJECTTYPE buttonTypeCode;
+	public int buttonID;								//!< this button's ID
+	public ObjectCategory.ROOMCODE buttonRoomCode;		//!< this button's roomcode (filter)
+	public ObjectCategory.OBJECTTYPE buttonTypeCode;	//!< this buttons objectCode (filter)
+    public SteamVR_LaserPointer pointer;				//!< pointer to the laserpointer
+    public SteamVR_TrackedController controller;		//!< pointer to the controller
+    public CatalogManager catalogManager;				//!< [duplicate] pointer to the catalog
 
-    public SteamVR_LaserPointer pointer;
-    public SteamVR_TrackedController controller;
+    private UnityEngine.UI.Image buttonImage;			//!< pointer to the image gameobject
+	private bool isSelected = false;					//!< hovered flag
+    private bool buttonSelected = false;				//!< selected flag
+    private static ObjectCategory.ROOMCODE  filterRoomCode = ObjectCategory.ROOMCODE.ALL;		//!< global filter value [room] for comparison between all buttons
+	private static ObjectCategory.OBJECTTYPE filterTypeCode = ObjectCategory.OBJECTTYPE.ALL;	//!< global filter value [object] for comparison between all buttons
 
-    public CatalogManager catalogManager;
-
-
-    private UnityEngine.UI.Image buttonImage;
-	private bool isSelected = false;
-    private bool buttonSelected = false;
-    private static ObjectCategory.ROOMCODE  filterRoomCode = ObjectCategory.ROOMCODE.ALL;
-	private static ObjectCategory.OBJECTTYPE filterTypeCode = ObjectCategory.OBJECTTYPE.ALL;
-
+	/*!
+	 * \brief Runs upon gameobject reEnable and initializes variables
+	 * \details This function initializes its own filter values.
+	 */
 	void OnEnable() {
 		if(buttonImage == null) {
 			buttonImage = GetComponent<UnityEngine.UI.Image>();
@@ -58,7 +67,10 @@ public class FilterButton : MonoBehaviour {
 		
 	}
 
-
+	/*!
+	 * \brief Runs upon gameobject spawn (at start) and initializes listeners
+	 * \details This function initializes the pointers to the scene gameObjects and listeners
+	 */
 	void Start() {
 		if (buttonImage == null) {
 			buttonImage = GetComponent<UnityEngine.UI.Image>();
@@ -68,6 +80,10 @@ public class FilterButton : MonoBehaviour {
         pointer.PointerOut += OffObjectHover;
     }
 
+	/*!
+	 * \brief checks to see if the button is still on after a different filter has been selected. Turns them off
+	 * \details Runs after every frame. 
+	 */
     void LateUpdate()
     {
         if (buttonID < 17)
@@ -89,6 +105,10 @@ public class FilterButton : MonoBehaviour {
 
     }
 
+	/*!
+	 * \brief Turns on the button when hovered
+	 * \details Runs when the pointer detects a collision. changes the sprite and flags to ON
+	 */
     public virtual void OnObjectHover(object sender, PointerEventArgs e)
     {
         if ((e.target == GetComponent<Collider>().transform))
@@ -100,6 +120,10 @@ public class FilterButton : MonoBehaviour {
         }
     }
 
+	/*!
+	 * \brief Runs the selected filter
+	 * \details Sets the appropriate filter
+	 */
     public virtual void OnSelectClick(object sender, ClickedEventArgs e)
     {
         if (buttonSelected)
@@ -227,6 +251,10 @@ public class FilterButton : MonoBehaviour {
         }
     }
 
+	/*!
+	 * \brief Turns off the button when not hovered
+	 * \details Runs when the pointer no longer detects a collision. changes the sprite and flags to OFF
+	 */
     public virtual void OffObjectHover(object sender, PointerEventArgs e)
     {
         if ((e.target == GetComponent<Collider>().transform))
@@ -238,8 +266,9 @@ public class FilterButton : MonoBehaviour {
         }
     }
 
-
-	// sets the off sprite and flag
+	/*!
+	 * \brief sets the off sprite and flag
+	 */
 	public void turnOff() {
 		if (!isOn)
 			return;
@@ -251,7 +280,9 @@ public class FilterButton : MonoBehaviour {
 		isOn = false;
 	}
 
-	//sets the on sprite and flag
+	/*!
+	 * \brief sets the on sprite and flag
+	 */
 	public void turnOn() {
 		if (isOn)
 			return;
@@ -259,6 +290,4 @@ public class FilterButton : MonoBehaviour {
 		buttonImage.sprite = onSprite;
 		isOn = true;
 	}
-
-
 }
