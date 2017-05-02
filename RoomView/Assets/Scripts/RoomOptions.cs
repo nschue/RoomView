@@ -1,23 +1,31 @@
-﻿using System.Collections;
+/*!
+ * \author HighFiveUTA Member
+ * \author [Contributed] Luis Diaz Jr
+ * \author [Doxygen] Luis Diaz Jr
+ * \version 1.0
+ * \date 4-17-2017
+ *
+ * \mainpage Room Options
+ * \brief Controls the pause function
+ */
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RoomOptions : MonoBehaviour {
 
-
-    
-    public SteamVR_TrackedController controllerInput;
-	public CatalogManager prefabCatalog;
+  public SteamVR_TrackedController controllerInput; //!< pointer to controller inputs
+	public CatalogManager prefabCatalog; //!< pointer to furniture catalog
 
 	[HideInInspector]
 	public bool optionsDisplaying = false;
 
 
-	private SteamVR_LaserPointer pointer;
-    private GameObject menuManager;
-    private bool isSelected = false;
-    private bool buttonSelected = false;
-    private bool catManIsActive;
+	private SteamVR_LaserPointer pointer; //!< pointer to SteamVr laser posinter
+    private GameObject menuManager; //!< pointer to menu manager
+    private bool isSelected = false; //!< [unused] is button selected
+    private bool buttonSelected = false; //!< [unused] is button selected
+    private bool catManIsActive; //!< [unused] is catalog active
 
     void Awake()
     {
@@ -27,12 +35,12 @@ public class RoomOptions : MonoBehaviour {
 
     void Start()
     {
-      
+
     }
 
     public virtual void displayInRoomMenu(object sender, ClickedEventArgs e)
     {
-        
+
         if (optionsDisplaying)
         {
             optionsOff();
@@ -70,9 +78,9 @@ public class RoomOptions : MonoBehaviour {
 		}
 		gameObject.SetActive(true);
 
-        
+
         transform.position = Camera.main.transform.position + Camera.main.transform.forward * 6.0f;
-      
+
         optionsDisplaying = true;
         raycastIgnoreOtherObjects();
     }
