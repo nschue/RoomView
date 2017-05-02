@@ -13,9 +13,9 @@ public class Furniture : MonoBehaviour {
     public bool isRotate = false;
     public bool isMove = false;
     public bool isClone = false;
-    public bool fromCatalog = false;
-    public bool needsPlacement = false;
-    public bool placing = false;
+    //public bool fromCatalog = false;
+    //public bool needsPlacement = false;
+    //public bool placing = false;
 
     //[DontSaveMember] private Material highlightMaterial;
 
@@ -43,9 +43,7 @@ public class Furniture : MonoBehaviour {
         
         //Can't be completed on furniture in the room at start
 
-        //controller is empty do this
-        /*GameObject controllerObject = GameObject.FindGameObjectWithTag("Right Controller") as GameObject;
-        //controller = controllerObject.GetComponent<SteamVR_TrackedObject>();*/
+
         
 
         if (controller != null)
@@ -66,26 +64,7 @@ public class Furniture : MonoBehaviour {
     {
         contextMenuPrefab = Resources.Load("UI Prefabs/ContextMenu") as GameObject;
         id = GetComponent<ObjectCategory>().objectID;
-        /*
-        highlightMaterial = Resources.Load("Materials/HoverHighlight") as Material;
 
-        List<Material> materials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
-        List<Material> newMaterials = gameObject.GetComponent<MeshRenderer>().materials.Cast<Material>().ToList();
-        if ( !isClone || fromCatalog) //If it is a clone, material arrays are being set be equal to the cloned object to prevent object from always being highlighted
-        {
-            newMaterials.Add(highlightMaterial);
-        }
-        else
-        {
-            materials.RemoveAt(materials.Count - 1);
-            pointer.PointerIn += OnHover;
-            pointer.PointerOut += OffHover;
-            controllerInput.PadClicked += OnPadClicked;
-        }
-        
-        materialArrayWithHighlight = newMaterials.ToArray();
-        materialArray = materials.ToArray();
-        */
 
         if (isClone)
         {
@@ -94,19 +73,19 @@ public class Furniture : MonoBehaviour {
             controllerInput.PadClicked += OnPadClicked;
 			//isClone = false;
         }
-
+		GameObject controllerObject = GameObject.FindGameObjectWithTag("Right Controller");
         if (controller == null)
-            controller = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedObject>();
+            controller = controllerObject.GetComponent<SteamVR_TrackedObject>();
 
         if(controllerInput == null)
         {
-            controllerInput = GameObject.Find("Controller (right)").GetComponent<SteamVR_TrackedController>();
+            controllerInput = controllerObject.GetComponent<SteamVR_TrackedController>();
             controllerInput.PadClicked += OnPadClicked;
         }
             
         if(pointer == null)
         {
-            pointer = GameObject.Find("Controller (right)").GetComponent<SteamVR_LaserPointer>();
+            pointer = controllerObject.GetComponent<SteamVR_LaserPointer>();
             pointer.PointerIn += OnHover;
             pointer.PointerOut += OffHover;
         }
@@ -124,7 +103,7 @@ public class Furniture : MonoBehaviour {
 			}
 		}
 		
-		//thisShader = GetComponent<MeshRenderer>().sharedMaterial;
+
 
 		UnityEditor.PrefabUtility.DisconnectPrefabInstance(this);
     }
@@ -134,9 +113,7 @@ public class Furniture : MonoBehaviour {
 
         if (isRotate)
         {
-            //targetRotation = controller.transform.rotation;
-            //targetRotation.eulerAngles = new Vector3(transform.eulerAngles.x, targetRotation.eulerAngles.y + rotationDifference.y, transform.eulerAngles.z);
-            //transform.rotation = targetRotation;
+
             float rotationAngle = 60f * Time.deltaTime;
             if (padX>0)
             {
@@ -152,7 +129,7 @@ public class Furniture : MonoBehaviour {
             }
         }
 
-        if (isMove & !isMoving & !fromCatalog)
+        if (isMove & !isMoving /*& !fromCatalog*/)
         {
             isMoving = true;
             controllerInput.TriggerClicked -= OnSelectButton;
@@ -170,18 +147,6 @@ public class Furniture : MonoBehaviour {
             transform.position = hit.point + offset;
         }
 
-        if(needsPlacement && !placing){
-            placing = true;
-            controllerInput.TriggerClicked += CompleteMove;
-            offset = GameObject.Find("PrefabCatalog").GetComponent<CatalogManager>().getObjectByID(id).transform.position;
-        }
-        else if (needsPlacement)
-        {
-            Ray raycast = new Ray(controller.transform.position, controller.transform.forward); //
-            RaycastHit hit;
-            bool bHit = Physics.Raycast(raycast, out hit);
-            transform.position = hit.point + offset;
-        }
 
         if (isSelected || isHover)//If hover or selected highlight
         {
@@ -228,14 +193,6 @@ public class Furniture : MonoBehaviour {
         isMoving = false;
         Debug.Log("Furniture.CompleteMove: END");
 
-        if (needsPlacement == true)
-        {
-            needsPlacement = false;
-            pointer.PointerIn += OnHover;
-            pointer.PointerOut += OffHover;
-            controllerInput.PadClicked += OnPadClicked;
-            fromCatalog = false;
-        }
     }
 
     void OnHover(object sender, PointerEventArgs e)
@@ -265,16 +222,7 @@ public class Furniture : MonoBehaviour {
         isFurnitureSelected = true;
         
     }
-    /*
-    public void setMaterialArray(Material[] newarray)
-    {
-        materialArray = newarray;
-    }
 
-    public Material[] getMaterialArray()
-    {
-        return materialArray;
-}*/
 
     private void OnPadClicked(object sender, ClickedEventArgs e)
     {
